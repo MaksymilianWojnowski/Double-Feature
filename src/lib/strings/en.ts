@@ -20,7 +20,7 @@ export const t = {
     verifying: 'Signing in…',
     otherEmail: 'Use a different email',
     errors: {
-      link: 'That sign-in link has expired or was already used. Request a new one.',
+      link: 'That sign-in link didn’t work. It may have expired, been used, or been opened in a different browser than the one you asked from. Request a new one here.',
       send: 'Couldn’t send the email. Wait a minute and try again.',
       code: 'That code didn’t work. Check it, or request a new email.',
     },

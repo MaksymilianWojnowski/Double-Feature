@@ -35,15 +35,27 @@ Next.js 16 (App Router) on Vercel, Supabase (Postgres, Auth, Realtime, RLS), TMD
 4. **Authentication → URL Configuration.**
    - **Site URL:** `http://localhost:3000` for now. Change it to your real domain once deployed.
    - **Redirect URLs:** add `http://localhost:3000/**`. After deploying, also add `https://your-domain/**` and `https://*.vercel.app/**` (preview deployments).
-5. **Authentication → Emails → Templates.** Edit **both** "Confirm sign up" (first login) and "Magic link" (later logins). Set the body to:
-   ```html
-   <h2>Sign in to Double Feature</h2>
-   <p>Your code: <strong>{{ .Token }}</strong></p>
-   <p><a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email">Or tap here to sign in</a></p>
-   ```
-   Why both a code and a link: an app installed on the iPhone home screen has its own storage, separate from Safari. A tapped link signs you in to Safari, not the app. Inside the installed app, type the code.
+5. **Sign-in emails.** You have two options.
 
-> **Email limits:** Supabase's built-in email sender only allows a few emails per hour. That's fine for two people, but repeated test logins can hit it. To lift it, add your own SMTP under **Authentication → Emails → SMTP Settings** (e.g. Resend's free tier).
+   **A. No setup: Supabase's default emails.** Nothing to change. You sign in by tapping the link, and you must open it **in the same browser you requested it from**. Limits:
+   - The built-in sender allows only a few emails per hour.
+   - An app installed on the iPhone Home Screen has its own storage, separate from Safari, so a tapped link signs in Safari, not the app.
+
+   **B. Custom SMTP + a code in the email (about 10 minutes).** Supabase only lets you edit email templates once you use your own SMTP.
+   1. Pick a sender:
+      - **Gmail, no domain needed.** Best with a new Gmail account just for this app. Turn on 2-Step Verification, then create an App Password at myaccount.google.com/apppasswords.
+      - **Resend**, once you own a domain.
+   2. In **Authentication → Emails → SMTP Settings**, enter:
+      - Gmail: host `smtp.gmail.com`, port `465`, username = the Gmail address, password = the 16-character App Password, sender = the same address.
+      - Resend: the host, port and credentials from its dashboard.
+   3. In **Authentication → Emails → Templates**, edit **both** "Confirm sign up" (first login) and "Magic link" (later logins). Set the body to:
+      ```html
+      <h2>Sign in to Double Feature</h2>
+      <p>Your code: <strong>{{ .Token }}</strong></p>
+      <p><a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email">Or tap here to sign in</a></p>
+      ```
+
+   With B, the link works in any browser, and the installed iPhone app signs in by typing the code. It also lifts the hourly email limit. The app handles both kinds of link, so you can start with A and switch to B later.
 
 ### Local env
 
@@ -89,8 +101,10 @@ Every later `git push` to `main` deploys automatically.
 ## Troubleshooting
 
 - **The sign-in link opens a broken URL.** The redirect URL isn't in Supabase's Redirect URLs allowlist (step 4 of the Supabase setup), so Supabase fell back to the Site URL.
-- **"That sign-in link has expired or was already used."** Some email apps open links to scan them, which uses the link up. Use the code instead.
-- **Every page errors locally.** `.env.local` is missing or has empty values.
+- **"That sign-in link didn't work."**
+  - With default emails (option A), the link must be opened in the same browser that requested it.
+  - Some email apps open links to scan them, which uses the link up. Request a new email, or use the code (option B).
+- **Every page errors locally.** `.env.local` is missing values or still has the placeholders from `.env.example` (e.g. `your-project-ref`).
 
 ## Project layout
 
