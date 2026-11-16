@@ -48,6 +48,24 @@ body {
   outline-offset: 3px;
 }
 
+/* Bottom sheet: slides up on open. Native <dialog>, so no JS animation state. */
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.sheet[open] {
+  animation: sheet-in 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.sheet[open]::backdrop {
+  animation: fade-in 0.32s ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

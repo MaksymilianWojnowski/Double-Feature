@@ -34,6 +34,14 @@ export async function makeDb() {
     })
   }
 
+  /** Runs one statement as the service role (the server's secret key): RLS bypassed. */
+  async function asService<T = Record<string, unknown>>(sql: string, params: unknown[] = []) {
+    return db.transaction(async (tx) => {
+      await tx.exec('set local role service_role')
+      return (await tx.query<T>(sql, params)).rows
+    })
+  }
+
   /** Two users in one pair, plus helpers to swipe as either. */
   async function pair() {
     const a = await user()
@@ -53,5 +61,5 @@ export async function makeDb() {
     return { a, b, pairId: p.id, code: p.invite_code, swipe, matches }
   }
 
-  return { db, user, as, pair }
+  return { db, user, as, asService, pair }
 }

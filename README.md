@@ -21,7 +21,7 @@ Next.js 16 (App Router) on Vercel, Supabase (Postgres, Auth, Realtime, RLS), TMD
 
 1. Create a project at [supabase.com](https://supabase.com/dashboard). Pick a region near you (e.g. Frankfurt for Poland).
 2. **Project Settings → API Keys.** Copy the Project URL, the **Publishable** key and the **Secret** key.
-3. **Create the schema.** Open **SQL Editor**, paste all of [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) and click **Run**.
+3. **Create the schema.** Open **SQL Editor** and run each file in [`supabase/migrations`](supabase/migrations) **in filename order** (`0001_…`, then `0002_…`, …): paste one, click **Run**, repeat. When a later milestone adds a file, run just that one.
    - Or use the CLI (no global install needed):
      ```bash
      npx supabase login
