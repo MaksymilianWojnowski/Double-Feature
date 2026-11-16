@@ -11,7 +11,7 @@ export const button = `${pill} bg-ink text-bg`
 export const buttonQuiet = `glass ${pill} text-ink`
 
 /** Like: accent-tinted glass capsule (the accent is for liking only). */
-export const buttonLike = `glass glass-accent ${pill} text-white disabled:opacity-100`
+export const buttonLike = `glass glass-accent ${pill} text-black disabled:opacity-100`
 
 export const link = 'text-small font-medium text-muted transition-colors hover:text-ink'
 

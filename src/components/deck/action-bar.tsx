@@ -31,7 +31,7 @@ export function ActionBar({
       >
         {t.deck.seen}
       </button>
-      <button type="button" onClick={() => onDecide('like')} disabled={disabled} aria-label={t.deck.like} className={`${iconButton} glass-accent size-16`}>
+      <button type="button" onClick={() => onDecide('like')} disabled={disabled} aria-label={t.deck.like} className="glass glass-accent flex size-16 items-center justify-center rounded-full text-black transition active:scale-95 disabled:opacity-30">
         <Heart size={26} strokeWidth={2.25} fill="currentColor" />
       </button>
     </div>

@@ -109,7 +109,7 @@ export function SwipeCard({
       <motion.span
         aria-hidden
         style={{ opacity: likeOpacity, scale: likeScale }}
-        className="glass glass-accent absolute top-5 left-5 flex items-center gap-1.5 rounded-full px-3.5 py-2 text-small font-semibold text-white"
+        className="glass glass-accent absolute top-5 left-5 flex items-center gap-1.5 rounded-full px-3.5 py-2 text-small font-semibold text-black"
       >
         <Heart size={16} strokeWidth={2.25} fill="currentColor" /> {t.deck.like}
       </motion.span>

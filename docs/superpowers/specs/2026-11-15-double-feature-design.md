@@ -88,6 +88,10 @@ This replaces the brief's "minimal, no glass, square" direction. The user found 
   - Screens without a card use a blurred grid of this week's trending posters (`PosterBackdrop`).
 - **Shapes:** card 28px radius, sheets 34px and inset from the edges, buttons as circles and capsules, grouped lists 16px. There's a floating capsule tab bar with icons and labels.
 - **Motion:** unchanged. Swipe physics, sheet slide-up, reduced motion respected.
+- **Accessibility over Apple defaults:**
+  - Tertiary label is `.5` alpha, not Apple's `.3`, to meet WCAG AA.
+  - Content on the orange accent is black: white on systemOrange is about 2:1.
+- **PWA:** manifest plus build-time generated icons (`icon.tsx`, `apple-icon.tsx`). No service worker, since offline wasn't asked for and installing doesn't need one.
 
 ## Left to the builder
 

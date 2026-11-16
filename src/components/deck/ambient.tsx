@@ -11,7 +11,7 @@ export function Ambient({ posterPath }: { posterPath: string | null | undefined 
         {posterPath && (
           <motion.img
             key={posterPath}
-            src={posterSrc(posterPath, 'w342')}
+            src={posterSrc(posterPath, 'w185')}
             alt=""
             className="absolute inset-0 h-full w-full scale-125 object-cover blur-3xl saturate-150"
             initial={{ opacity: 0 }}

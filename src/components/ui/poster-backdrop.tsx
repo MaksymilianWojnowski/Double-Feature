@@ -13,7 +13,7 @@ export async function PosterBackdrop() {
         <div className="absolute -inset-[10%] grid grid-cols-3 grid-rows-3 opacity-80 blur-2xl saturate-[1.8]">
           {posters.slice(0, 9).map((p) => (
             // eslint-disable-next-line @next/next/no-img-element -- small TMDB size, blurred anyway
-            <img key={p} src={posterSrc(p, 'w342')} alt="" className="h-full w-full object-cover" />
+            <img key={p} src={posterSrc(p, 'w185')} alt="" fetchPriority="low" decoding="async" className="h-full w-full object-cover" />
           ))}
         </div>
       )}

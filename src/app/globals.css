@@ -9,7 +9,7 @@
   --color-line: rgb(84 84 88 / 0.6);
   --color-ink: #fff;
   --color-muted: rgb(235 235 245 / 0.6);
-  --color-faint: rgb(235 235 245 / 0.3);
+  --color-faint: rgb(235 235 245 / 0.5); /* Apple uses .3; .5 meets WCAG AA 4.5:1 on black */
   --color-accent: #ff9f0a; /* like + the match moment only */
   --color-danger: #ff453a; /* systemRed: destructive actions only */
   --color-switch: #30d158; /* systemGreen: the "on" state of switches, as in iOS */
@@ -59,8 +59,8 @@
 @utility glass-accent {
   --glass-fill: linear-gradient(
     160deg,
-    color-mix(in oklab, var(--color-accent) 75%, transparent),
-    color-mix(in oklab, var(--color-accent) 45%, transparent)
+    color-mix(in oklab, var(--color-accent) 96%, transparent),
+    color-mix(in oklab, var(--color-accent) 82%, transparent)
   );
 }
 

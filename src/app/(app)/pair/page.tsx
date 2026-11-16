@@ -41,10 +41,17 @@ export default async function PairPage() {
 
       {/* iOS grouped list: account actions at the bottom, destructive last. */}
       <div className="mt-auto flex flex-col gap-3">
-        <Link href="/settings" className="glass flex items-center justify-between rounded-2xl px-5 py-3.5 transition-colors active:bg-white/10">
-          {t.settings.open}
-          <ChevronRight size={18} strokeWidth={2.25} className="text-faint" aria-hidden />
-        </Link>
+        <div className="glass divide-y divide-white/10 overflow-hidden rounded-2xl">
+          {[
+            ['/settings', t.settings.open],
+            ['/about', t.about.title],
+          ].map(([href, label]) => (
+            <Link key={href} href={href} className="flex items-center justify-between px-5 py-3.5 transition-colors active:bg-white/10">
+              {label}
+              <ChevronRight size={18} strokeWidth={2.25} className="text-faint" aria-hidden />
+            </Link>
+          ))}
+        </div>
         <form action="/auth/signout" method="post" className="glass overflow-hidden rounded-2xl">
           <button className="w-full px-5 py-3.5 text-left text-body transition-colors active:bg-white/10">{t.pair.signOut}</button>
         </form>

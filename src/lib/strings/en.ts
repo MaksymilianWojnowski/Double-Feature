@@ -84,6 +84,20 @@ export const t = {
     no: 'Norwegian',
     tr: 'Turkish',
   } as Record<string, string>,
+  errors: {
+    title: 'Something went wrong',
+    body: 'This screen didn’t load. Check your connection and try again.',
+  },
+  about: {
+    title: 'About',
+    body: 'Two people swipe on their own. When you both like the same film or series, it’s a match.',
+    dataTitle: 'Data',
+    tmdbLogoAlt: 'The Movie Database (TMDB)',
+    // Exact wording required by TMDB's API terms.
+    tmdbNotice: 'This product uses the TMDB API but is not endorsed or certified by TMDB.',
+    justWatch: 'Streaming availability is provided by JustWatch.',
+    back: 'Back',
+  },
   search: {
     title: 'Search',
     placeholder: 'Films and series',

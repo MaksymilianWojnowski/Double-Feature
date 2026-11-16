@@ -91,12 +91,29 @@ The database tests run the real migration on an in-process Postgres (PGlite), so
 
 Every later `git push` to `main` deploys automatically.
 
+**Before your first real use, check:**
+- [ ] All four env vars are set in Vercel. Without `SUPABASE_SECRET_KEY` the deck works but never mixes in your partner's likes.
+- [ ] Every file in `supabase/migrations` has been run, in order (`0001`, `0002`, `0003`).
+- [ ] Supabase's Site URL and Redirect URLs include the deployed address.
+- [ ] Both of you can sign in. Then one creates the pair on the **Pair** tab and sends the invite link.
+- [ ] Set your services on **Settings** (the sliders icon on the deck).
+
 ### Connect your domain
 
 1. Vercel → your project → **Settings → Domains → Add**. Enter your domain (e.g. `doublefeature.pl` or `watch.yourname.com`).
 2. Vercel shows the DNS records to create: usually an **A** record for a root domain, or a **CNAME** for a subdomain. Add exactly those at your domain registrar.
 3. Wait for Vercel to show the domain as **Valid** (minutes to a few hours). HTTPS is issued automatically.
 4. In Supabase **Authentication → URL Configuration**: set **Site URL** to `https://your-domain` and add `https://your-domain/**` to Redirect URLs.
+
+## 4. Install it on your phone
+
+The app is an installable web app: it gets its own icon, opens full screen, and has no browser bars.
+
+- **iPhone (Safari):** open the site, tap **Share → Add to Home Screen**.
+  - Inside the installed app, sign in with the **code** from the email. That needs option B in the Supabase setup: an app on the Home Screen doesn't share Safari's login.
+- **Android (Chrome):** open the site, tap **⋮ → Install app** (or **Add to Home screen**).
+
+There's no offline mode: the deck needs the network for posters and titles.
 
 ## Troubleshooting
 
@@ -105,16 +122,20 @@ Every later `git push` to `main` deploys automatically.
   - With default emails (option A), the link must be opened in the same browser that requested it.
   - Some email apps open links to scan them, which uses the link up. Request a new email, or use the code (option B).
 - **Every page errors locally.** `.env.local` is missing values or still has the placeholders from `.env.example` (e.g. `your-project-ref`).
+- **Files named `… 2.json` / `… 2.ts` appear, or `npm run dev` serves old code.** The project is in a folder synced by iCloud ("Desktop & Documents"). Move it somewhere unsynced, e.g. `~/Developer`.
 
 ## Project layout
 
 ```
-src/app/(app)/        signed-in screens that need a pair (deck, pair, …)
-src/app/              login, auth/confirm, join/[code], onboarding
+src/app/(app)/        signed-in screens: deck, matches, search, pair, settings
+src/app/              login, auth/confirm, join/[code], onboarding, about, icons + manifest (PWA)
+src/app/api/          deck, titles, providers, search: the only places that talk to TMDB
+src/components/       deck/, details/, match/ (match moment + realtime), matches/, ui/
+src/lib/deck/         deck builder, discover params, genre map
+src/lib/tmdb/         server-only TMDB client (retry + cache), image URLs
 src/lib/strings/en.ts every user-facing string (add pl.ts with the same shape for Polish)
-src/lib/supabase/     browser and server clients
 src/proxy.ts          session refresh + sign-in gate
-supabase/migrations/  SQL: tables, RLS, match trigger, pair RPCs
+supabase/migrations/  SQL: tables, RLS, match trigger, RPCs
 tests/                vitest; tests/db runs the migrations on PGlite
 ```
 

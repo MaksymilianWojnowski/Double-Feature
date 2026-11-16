@@ -158,7 +158,7 @@ function LikeButton({ liked, title, onClick }: { liked: boolean; title: string; 
       aria-label={t.search.like(title)}
       aria-pressed={liked}
       onClick={onClick}
-      className={`flex size-10 shrink-0 items-center justify-center rounded-full transition active:scale-90 ${liked ? 'glass glass-accent text-white' : 'glass text-ink'}`}
+      className={`flex size-10 shrink-0 items-center justify-center rounded-full transition active:scale-90 ${liked ? 'glass glass-accent text-black' : 'glass text-ink'}`}
     >
       <Heart size={18} strokeWidth={2.25} fill={liked ? 'currentColor' : 'none'} />
     </button>
