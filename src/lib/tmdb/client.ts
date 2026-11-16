@@ -70,12 +70,21 @@ export async function searchTitles(query: string): Promise<Card[]> {
     .map((r) => toCard(r.media_type, r))
 }
 
-/** This week's trending poster paths, for the blurred backdrop behind screens without a card. Cached 24h. */
+/**
+ * This week's trending poster paths, for the blurred backdrop behind screens without a card. Cached 24h.
+ * Never throws: it runs while prerendering static pages, where an error inside a cache scope fails the
+ * whole build even if the caller catches it. Decoration must not block a deploy (missing token, TMDB down).
+ */
 export async function trendingPosters(): Promise<string[]> {
   'use cache: remote'
-  cacheLife('days')
-  const raw = await get<{ results: RawTitle[] }>('/trending/all/week')
-  return raw.results.map((r) => r.poster_path).filter((p): p is string => !!p)
+  try {
+    const raw = await get<{ results: RawTitle[] }>('/trending/all/week')
+    cacheLife('days')
+    return raw.results.map((r) => r.poster_path).filter((p): p is string => !!p)
+  } catch {
+    cacheLife('minutes') // try again soon rather than keep a plain black backdrop for a day
+    return []
+  }
 }
 
 type RawProvider = { provider_id: number; provider_name: string; logo_path: string }

@@ -6,7 +6,7 @@ import { posterSrc } from '@/lib/tmdb/images'
  * Glass needs colour behind it; on plain black it disappears. Falls back to black if TMDB is down.
  */
 export async function PosterBackdrop() {
-  const posters = await trendingPosters().catch(() => [])
+  const posters = await trendingPosters() // never throws; [] when TMDB is unavailable
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-bg">
       {posters.length > 0 && (
