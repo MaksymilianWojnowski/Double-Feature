@@ -31,7 +31,10 @@ export async function GET(request: NextRequest) {
 
   const key = settingsKey(settings)
   const q = request.nextUrl.searchParams
-  const types: MediaType[] = settings.content_type === 'both' ? ['movie', 'tv'] : [settings.content_type]
+  // Types the genre filter rules out entirely (e.g. series when only Horror is chosen) aren't fetched at all.
+  const types = (settings.content_type === 'both' ? (['movie', 'tv'] as MediaType[]) : [settings.content_type]).filter(
+    (t) => discoverParams(settings, t, 1) !== null,
+  )
   const page = {} as Record<MediaType, number>
   for (const t of types) {
     const saved = Number(q.get(t))
@@ -45,7 +48,7 @@ export async function GET(request: NextRequest) {
     for (let walked = 0; walked < MAX_PAGES_PER_REQUEST && fresh.length < DECK_BATCH; walked++) {
       const active = types.filter((t) => page[t] <= (total[t] ?? 500))
       if (!active.length) break
-      const pages = await Promise.all(active.map((t) => discover(t, discoverParams(settings, t, page[t]))))
+      const pages = await Promise.all(active.map((t) => discover(t, discoverParams(settings, t, page[t])!)))
       active.forEach((t, i) => {
         total[t] = pages[i].totalPages
         page[t]++

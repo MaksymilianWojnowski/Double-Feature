@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { AnimatePresence } from 'motion/react'
+import { SlidersHorizontal } from 'lucide-react'
 import { t } from '@/lib/strings/en'
-import { buttonQuiet } from '@/components/ui/styles'
+import { buttonQuiet, iconButton } from '@/components/ui/styles'
 import { DetailsSheet } from '@/components/details/details-sheet'
 import type { Card, TitleDetails } from '@/lib/tmdb/types'
 import { ActionBar } from './action-bar'
@@ -48,6 +50,11 @@ export function Deck() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Ambient posterPath={top?.posterPath} />
+      <div className="flex justify-end pb-3">
+        <Link href="/settings" aria-label={t.settings.open} className={`${iconButton} size-10`}>
+          <SlidersHorizontal size={18} strokeWidth={2.25} />
+        </Link>
+      </div>
       <div className="flex min-h-0 flex-1 items-center justify-center">
         <div className="relative aspect-[2/3] max-h-full w-full">
           {top ? (
@@ -93,7 +100,15 @@ function EmptyState({ deck }: { deck: ReturnType<typeof useDeck> }) {
       </Placeholder>
     )
   }
-  if (deck.done) return <Placeholder title={t.deck.emptyTitle} body={t.deck.emptyBody} />
+  if (deck.done) {
+    return (
+      <Placeholder title={t.deck.emptyTitle} body={t.deck.emptyBody}>
+        <Link href="/settings" className={`${buttonQuiet} mt-6`}>
+          {t.settings.open}
+        </Link>
+      </Placeholder>
+    )
+  }
   return (
     <div className="absolute inset-0 animate-pulse rounded-card bg-white/5" role="status" aria-label={t.deck.loading} />
   )

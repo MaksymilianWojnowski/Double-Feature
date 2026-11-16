@@ -1,8 +1,9 @@
 import type { MediaType } from '@/lib/tmdb/types'
 import { DEFAULT_MIN_VOTES } from './config'
+import { GENRES, type GenreKey } from './genres'
 
 export type Filters = {
-  genres?: number[]
+  genres?: GenreKey[] // any of them
   yearMin?: number
   yearMax?: number
   minRating?: number
@@ -20,9 +21,14 @@ export type PairSettings = {
   filters: Filters
 }
 
-/** TMDB /discover query for one page under the pair's settings. Both partners get the same order. */
-export function discoverParams(settings: PairSettings, type: MediaType, page: number): Record<string, string> {
+/**
+ * TMDB /discover query for one page under the pair's settings. Both partners get the same order.
+ * Null when the chosen genres don't exist for this type (e.g. Horror for series): skip the type, don't drop the filter.
+ */
+export function discoverParams(settings: PairSettings, type: MediaType, page: number): Record<string, string> | null {
   const f = settings.filters
+  const genreIds = [...new Set((f.genres ?? []).flatMap((g) => GENRES[g]?.[type] ?? []))]
+  if (f.genres?.length && !genreIds.length) return null
   const date = type === 'movie' ? 'primary_release_date' : 'first_air_date'
   const p: Record<string, string | number | undefined> = {
     page,
@@ -30,7 +36,7 @@ export function discoverParams(settings: PairSettings, type: MediaType, page: nu
     include_adult: 'false',
     'vote_count.gte': f.minVotes ?? DEFAULT_MIN_VOTES,
     'vote_average.gte': f.minRating,
-    with_genres: f.genres?.length ? f.genres.join('|') : undefined,
+    with_genres: genreIds.length ? genreIds.join('|') : undefined,
     with_original_language: f.language,
     [`${date}.gte`]: f.yearMin ? `${f.yearMin}-01-01` : undefined,
     [`${date}.lte`]: f.yearMax ? `${f.yearMax}-12-31` : undefined,

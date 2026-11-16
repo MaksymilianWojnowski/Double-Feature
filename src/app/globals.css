@@ -12,6 +12,7 @@
   --color-faint: rgb(235 235 245 / 0.3);
   --color-accent: #ff9f0a; /* like + the match moment only */
   --color-danger: #ff453a; /* systemRed: destructive actions only */
+  --color-switch: #30d158; /* systemGreen: the "on" state of switches, as in iOS */
   --color-black: #000;
   --color-white: #fff;
   --color-transparent: transparent;

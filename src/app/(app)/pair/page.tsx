@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 import { getMyPair } from '@/lib/pair'
 import { t } from '@/lib/strings/en'
 import { PosterBackdrop } from '@/components/ui/poster-backdrop'
@@ -39,6 +41,10 @@ export default async function PairPage() {
 
       {/* iOS grouped list: account actions at the bottom, destructive last. */}
       <div className="mt-auto flex flex-col gap-3">
+        <Link href="/settings" className="glass flex items-center justify-between rounded-2xl px-5 py-3.5 transition-colors active:bg-white/10">
+          {t.settings.open}
+          <ChevronRight size={18} strokeWidth={2.25} className="text-faint" aria-hidden />
+        </Link>
         <form action="/auth/signout" method="post" className="glass overflow-hidden rounded-2xl">
           <button className="w-full px-5 py-3.5 text-left text-body transition-colors active:bg-white/10">{t.pair.signOut}</button>
         </form>

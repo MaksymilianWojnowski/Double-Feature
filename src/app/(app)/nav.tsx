@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { GalleryVerticalEnd, Heart, UsersRound } from 'lucide-react'
+import { GalleryVerticalEnd, Heart, Search, UsersRound } from 'lucide-react'
 import { t } from '@/lib/strings/en'
 
 const items = [
   { href: '/', label: t.nav.deck, Icon: GalleryVerticalEnd },
   { href: '/matches', label: t.nav.matches, Icon: Heart },
+  { href: '/search', label: t.nav.search, Icon: Search },
   { href: '/pair', label: t.nav.pair, Icon: UsersRound },
 ] as const
 
@@ -22,7 +23,7 @@ export function Nav() {
             <Link
               href={href}
               aria-current={path === href ? 'page' : undefined}
-              className="flex min-w-20 flex-col items-center gap-0.5 rounded-full px-5 py-1.5 text-caption text-muted transition-colors aria-[current=page]:bg-white/15 aria-[current=page]:text-ink"
+              className="flex min-w-[4.5rem] flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-caption text-muted transition-colors aria-[current=page]:bg-white/15 aria-[current=page]:text-ink"
             >
               <Icon size={22} strokeWidth={2} aria-hidden />
               {label}

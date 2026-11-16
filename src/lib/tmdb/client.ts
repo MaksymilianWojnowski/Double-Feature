@@ -1,6 +1,7 @@
 import 'server-only'
 import { cacheLife } from 'next/cache'
 import { fetchWithRetry } from './fetch-retry'
+import { mergeProviders, type RawWatchProvider } from './providers'
 import { cardKey, type Card, type Details, type MediaType, type Provider, type RegionProviders } from './types'
 
 const BASE = 'https://api.themoviedb.org/3'
@@ -45,6 +46,28 @@ export async function discover(type: MediaType, params: Record<string, string>) 
     totalPages: Math.min(raw.total_pages, 500), // TMDB refuses pages past 500
     cards: raw.results.filter((r) => r.poster_path).map((r) => toCard(type, r)),
   }
+}
+
+/** Streaming services available in a region (films + series), TMDB's order. Cached 24h. */
+export async function providers(region: string): Promise<Provider[]> {
+  'use cache: remote'
+  cacheLife('days')
+  const lists = await Promise.all(
+    (['movie', 'tv'] as const).map((type) =>
+      get<{ results: RawWatchProvider[] }>(`/watch/providers/${type}`, { watch_region: region }).then((r) => r.results),
+    ),
+  )
+  return mergeProviders(lists, region)
+}
+
+/** Films and series matching a title query (people dropped, posterless dropped). Cached 1h. */
+export async function searchTitles(query: string): Promise<Card[]> {
+  'use cache: remote'
+  cacheLife('hours')
+  const raw = await get<{ results: (RawTitle & { media_type: string })[] }>('/search/multi', { query, include_adult: 'false' })
+  return raw.results
+    .filter((r): r is RawTitle & { media_type: MediaType } => (r.media_type === 'movie' || r.media_type === 'tv') && !!r.poster_path)
+    .map((r) => toCard(r.media_type, r))
 }
 
 /** This week's trending poster paths, for the blurred backdrop behind screens without a card. Cached 24h. */

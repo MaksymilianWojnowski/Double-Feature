@@ -74,7 +74,7 @@ describe('discoverParams', () => {
 
   it('uses first-air dates and no runtime for series', () => {
     const p = discoverParams({ ...base, filters: { yearMin: 2010, runtimeMax: 60 } }, 'tv', 1)
-    expect(p['first_air_date.gte']).toBe('2010-01-01')
+    expect(p!['first_air_date.gte']).toBe('2010-01-01')
     expect(p).not.toHaveProperty('primary_release_date.gte')
     expect(p).not.toHaveProperty('with_runtime.lte')
   })
@@ -87,9 +87,22 @@ describe('discoverParams', () => {
   })
 
   it('defaults the vote floor and maps rating, genres and language', () => {
-    expect(discoverParams(base, 'movie', 1)['vote_count.gte']).toBe('150')
-    const p = discoverParams({ ...base, filters: { minVotes: 1000, minRating: 7, genres: [18, 35], language: 'ko' } }, 'tv', 1)
+    expect(discoverParams(base, 'movie', 1)!['vote_count.gte']).toBe('150')
+    const p = discoverParams({ ...base, filters: { minVotes: 1000, minRating: 7, genres: ['drama', 'comedy'], language: 'ko' } }, 'tv', 1)
     expect(p).toMatchObject({ 'vote_count.gte': '1000', 'vote_average.gte': '7', with_genres: '18|35', with_original_language: 'ko' })
+  })
+
+  it("maps a genre to each type's own ids", () => {
+    const f = { ...base, filters: { genres: ['scifi' as const, 'action' as const] } }
+    expect(discoverParams(f, 'movie', 1)!.with_genres).toBe('878|28')
+    expect(discoverParams(f, 'tv', 1)!.with_genres).toBe('10765|10759')
+  })
+
+  it('returns null for a type that has none of the chosen genres, instead of ignoring the filter', () => {
+    const horror = { ...base, filters: { genres: ['horror' as const] } }
+    expect(discoverParams(horror, 'tv', 1)).toBeNull()
+    expect(discoverParams(horror, 'movie', 1)!.with_genres).toBe('27')
+    expect(discoverParams({ ...base, filters: { genres: [] } }, 'tv', 1)).not.toHaveProperty('with_genres')
   })
 })
 
