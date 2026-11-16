@@ -3,6 +3,7 @@ export const t = {
   app: {
     name: 'Double Feature',
     tagline: 'Find what you both want to watch.',
+    loading: 'Loading',
   },
   nav: {
     deck: 'Deck',
