@@ -9,7 +9,8 @@ import type { Card, TitleDetails } from '@/lib/tmdb/types'
 import { ActionBar } from './action-bar'
 import { Ambient } from './ambient'
 import { SwipeCard } from './swipe-card'
-import { useDeck, type Decision, type Match } from './use-deck'
+import { useMatchMoment } from '@/components/match/match-provider'
+import { useDeck, type Decision } from './use-deck'
 
 const KEYS: Record<string, Decision | 'undo' | 'open'> = {
   ArrowLeft: 'pass',
@@ -22,8 +23,8 @@ const KEYS: Record<string, Decision | 'undo' | 'open'> = {
 
 const loaded = (d: TitleDetails | 'error' | undefined) => (typeof d === 'object' ? d : undefined)
 
-export function Deck({ onMatch }: { onMatch?: (m: Match) => void }) {
-  const deck = useDeck({ onMatch })
+export function Deck() {
+  const deck = useDeck({ onMatch: useMatchMoment() })
   const [open, setOpen] = useState<Card | null>(null)
   const top = deck.queue[0]
 

@@ -10,7 +10,19 @@ import { buttonQuiet, iconButton, label, link } from '@/components/ui/styles'
 import { TrailerDialog } from './trailer-dialog'
 
 // Native <dialog>: focus trap, Escape, inert background and backdrop for free.
-export function DetailsSheet({ card, details, onClose }: { card: Card | null; details?: TitleDetails | 'error'; onClose: () => void }) {
+export function DetailsSheet({
+  card,
+  details,
+  onClose,
+  actions,
+  footer,
+}: {
+  card: Card | null
+  details?: TitleDetails | 'error'
+  onClose: () => void
+  actions?: React.ReactNode // under the header, e.g. a match's Watched + ratings
+  footer?: React.ReactNode // last, e.g. a destructive action
+}) {
   const ref = useRef<HTMLDialogElement>(null)
   const [trailer, setTrailer] = useState(false)
 
@@ -47,6 +59,8 @@ export function DetailsSheet({ card, details, onClose }: { card: Card | null; de
                 <X size={17} strokeWidth={2.5} />
               </button>
             </header>
+
+            {actions}
 
             {details === 'error' && <p className="text-muted">{t.title.loadError}</p>}
 
@@ -94,6 +108,7 @@ export function DetailsSheet({ card, details, onClose }: { card: Card | null; de
             <a href={`https://www.themoviedb.org/${card.mediaType}/${card.tmdbId}`} target="_blank" rel="noreferrer" className={`${link} px-1`}>
               {t.title.viewOnTmdb}
             </a>
+            {footer}
           </div>
         )}
       </dialog>

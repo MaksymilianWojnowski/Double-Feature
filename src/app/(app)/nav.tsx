@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { GalleryVerticalEnd, UsersRound } from 'lucide-react'
+import { GalleryVerticalEnd, Heart, UsersRound } from 'lucide-react'
 import { t } from '@/lib/strings/en'
 
 const items = [
   { href: '/', label: t.nav.deck, Icon: GalleryVerticalEnd },
+  { href: '/matches', label: t.nav.matches, Icon: Heart },
   { href: '/pair', label: t.nav.pair, Icon: UsersRound },
 ] as const
 
