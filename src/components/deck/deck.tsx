@@ -7,6 +7,7 @@ import { buttonQuiet } from '@/components/ui/styles'
 import { DetailsSheet } from '@/components/details/details-sheet'
 import type { Card, TitleDetails } from '@/lib/tmdb/types'
 import { ActionBar } from './action-bar'
+import { Ambient } from './ambient'
 import { SwipeCard } from './swipe-card'
 import { useDeck, type Decision, type Match } from './use-deck'
 
@@ -45,6 +46,7 @@ export function Deck({ onMatch }: { onMatch?: (m: Match) => void }) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      <Ambient posterPath={top?.posterPath} />
       <div className="flex min-h-0 flex-1 items-center justify-center">
         <div className="relative aspect-[2/3] max-h-full w-full">
           {top ? (
@@ -69,11 +71,11 @@ export function Deck({ onMatch }: { onMatch?: (m: Match) => void }) {
         </div>
       </div>
 
-      <p role="status" className="h-5 text-center text-small text-muted">
+      <p role="status" className="h-5 pt-1 text-center text-small text-muted">
         {deck.notice}
       </p>
       <ActionBar onDecide={deck.decide} onUndo={deck.undo} canUndo={deck.canUndo} disabled={!top} />
-      <p className="hidden pb-2 text-center text-small whitespace-pre text-muted [@media(pointer:fine)]:block">{t.deck.keys}</p>
+      <p className="hidden text-center text-caption whitespace-pre text-faint [@media(pointer:fine)]:block">{t.deck.keys}</p>
 
       <DetailsSheet card={open} details={open ? deck.details[open.key] : undefined} onClose={() => setOpen(null)} />
     </div>
@@ -92,14 +94,14 @@ function EmptyState({ deck }: { deck: ReturnType<typeof useDeck> }) {
   }
   if (deck.done) return <Placeholder title={t.deck.emptyTitle} body={t.deck.emptyBody} />
   return (
-    <div className="absolute inset-0 animate-pulse rounded-sm bg-surface" role="status" aria-label={t.deck.loading} />
+    <div className="absolute inset-0 animate-pulse rounded-card bg-white/5" role="status" aria-label={t.deck.loading} />
   )
 }
 
 function Placeholder({ title, body, children }: { title: string; body: string; children?: React.ReactNode }) {
   return (
-    <div className="absolute inset-0 flex flex-col justify-end rounded-sm border border-line p-6">
-      <h2 className="font-display text-title">{title}</h2>
+    <div className="glass absolute inset-0 flex flex-col justify-end rounded-card p-6">
+      <h2 className="text-title">{title}</h2>
       <p className="mt-2 text-muted">{body}</p>
       {children}
     </div>

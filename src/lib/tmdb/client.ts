@@ -47,6 +47,14 @@ export async function discover(type: MediaType, params: Record<string, string>) 
   }
 }
 
+/** This week's trending poster paths, for the blurred backdrop behind screens without a card. Cached 24h. */
+export async function trendingPosters(): Promise<string[]> {
+  'use cache: remote'
+  cacheLife('days')
+  const raw = await get<{ results: RawTitle[] }>('/trending/all/week')
+  return raw.results.map((r) => r.poster_path).filter((p): p is string => !!p)
+}
+
 type RawProvider = { provider_id: number; provider_name: string; logo_path: string }
 type RawDetails = RawTitle & {
   vote_average: number

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useSyncExternalStore } from 'react'
+import { Share } from 'lucide-react'
 import { t } from '@/lib/strings/en'
-import { button, label } from '@/components/ui/styles'
+import { button } from '@/components/ui/styles'
 
 const noop = () => () => {}
 
@@ -23,13 +24,14 @@ export function InviteLink({ code }: { code: string }) {
   }
 
   return (
-    <section className="mt-12 flex flex-col gap-6">
+    <section className="glass flex flex-col gap-5 rounded-3xl p-5">
       <p className="text-muted">{t.pair.inviteBody}</p>
       <div>
-        <p className={label}>{t.pair.inviteCode}</p>
-        <p className="mt-1 font-display text-title tracking-[0.2em]">{code}</p>
+        <p className="text-small text-muted">{t.pair.inviteCode}</p>
+        <p className="mt-0.5 text-title tracking-[0.15em] tabular-nums">{code}</p>
       </div>
       <button className={button} onClick={send} aria-live="polite">
+        {!copied && <Share size={18} strokeWidth={2.25} aria-hidden />}
         {copied ? t.pair.copied : canShare ? t.pair.share : t.pair.copy}
       </button>
     </section>

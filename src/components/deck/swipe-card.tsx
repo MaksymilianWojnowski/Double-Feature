@@ -2,6 +2,7 @@
 
 import { useRef } from 'react'
 import { motion, useMotionValue, useReducedMotion, useTransform, type PanInfo } from 'motion/react'
+import { Heart, X } from 'lucide-react'
 import { t } from '@/lib/strings/en'
 import { logoSrc, POSTER_SIZES, posterSrc, posterSrcSet } from '@/lib/tmdb/images'
 import type { Card, TitleDetails } from '@/lib/tmdb/types'
@@ -42,6 +43,8 @@ export function SwipeCard({
   const rotate = useTransform(x, [-300, 0, 300], [-12, 0, 12])
   const likeOpacity = useTransform(x, [20, DISTANCE], [0, 1])
   const passOpacity = useTransform(x, [-DISTANCE, -20], [1, 0])
+  const likeScale = useTransform(x, [20, DISTANCE], [0.8, 1])
+  const passScale = useTransform(x, [-DISTANCE, -20], [1, 0.8])
 
   function onDragEnd(_: unknown, { offset, velocity }: PanInfo) {
     if (offset.x > DISTANCE || (velocity.x > VELOCITY && offset.x > 20)) onDecide('like')
@@ -52,7 +55,7 @@ export function SwipeCard({
 
   return (
     <motion.article
-      className="absolute inset-0 cursor-grab touch-pan-y overflow-hidden rounded-sm bg-surface select-none active:cursor-grabbing"
+      className="absolute inset-0 cursor-grab touch-pan-y overflow-hidden rounded-card bg-surface shadow-[0_24px_60px_rgb(0_0_0/0.55)] select-none active:cursor-grabbing"
       style={{ x, rotate: reduce ? 0 : rotate }}
       drag={isTop ? 'x' : false}
       dragSnapToOrigin
@@ -60,8 +63,8 @@ export function SwipeCard({
       onDragStart={() => (dragged.current = true)}
       onDragEnd={onDragEnd}
       onTap={isTop ? open : undefined}
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: isTop ? 1 : 0.96 }}
+      initial={{ opacity: 0, scale: 0.94 }}
+      animate={{ opacity: 1, scale: isTop ? 1 : 0.94, y: isTop ? 0 : 10 }}
       exit="exit"
       variants={{ exit: (d: Decision) => exitTo(d, reduce) }}
       transition={{ type: 'spring', stiffness: 380, damping: 34 }}
@@ -80,38 +83,42 @@ export function SwipeCard({
         />
       )}
 
-      <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-bg via-bg/75 to-transparent px-5 pt-28 pb-5">
-        <h2 className="font-display text-title text-balance">
+      {/* Apple-style variable blur: the poster softens into the caption instead of a hard scrim. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 backdrop-blur-2xl [mask-image:linear-gradient(to_bottom,transparent,black_60%)]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-black/80 via-black/35 to-transparent" />
+
+      <div className="absolute inset-x-0 bottom-0 px-5 pb-5">
+        <h2 className="text-title text-balance">
           {/* The title doubles as the keyboard/screen-reader way into details. */}
           <button type="button" onClick={open} tabIndex={isTop ? 0 : -1} aria-label={t.deck.details(card.title)} className="text-left">
             {card.title}
           </button>
         </h2>
-        <p className="mt-1 text-small text-muted">{metaLine(card, details)}</p>
+        <p className="mt-1 text-small text-white/70">{metaLine(card, details)}</p>
         {providers.length > 0 && (
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3 flex items-center gap-1.5">
             {providers.map((p) => (
               // eslint-disable-next-line @next/next/no-img-element -- TMDB CDN logo
-              <img key={p.id} src={logoSrc(p.logoPath)} alt={p.name} title={p.name} width={24} height={24} className="size-6 rounded-sm" />
+              <img key={p.id} src={logoSrc(p.logoPath)} alt={p.name} title={p.name} width={26} height={26} className="size-[26px] rounded-[7px]" />
             ))}
-            <span className="text-small text-muted">JustWatch</span>
+            <span className="ml-1 text-small text-white/50">JustWatch</span>
           </div>
         )}
       </div>
 
       <motion.span
         aria-hidden
-        style={{ opacity: likeOpacity }}
-        className="absolute top-5 left-5 rounded-sm border border-accent px-2 py-1 text-small tracking-[0.2em] text-accent uppercase"
+        style={{ opacity: likeOpacity, scale: likeScale }}
+        className="glass glass-accent absolute top-5 left-5 flex items-center gap-1.5 rounded-full px-3.5 py-2 text-small font-semibold text-white"
       >
-        {t.deck.like}
+        <Heart size={16} strokeWidth={2.25} fill="currentColor" /> {t.deck.like}
       </motion.span>
       <motion.span
         aria-hidden
-        style={{ opacity: passOpacity }}
-        className="absolute top-5 right-5 rounded-sm border border-ink/50 px-2 py-1 text-small tracking-[0.2em] text-ink uppercase"
+        style={{ opacity: passOpacity, scale: passScale }}
+        className="glass absolute top-5 right-5 flex items-center gap-1.5 rounded-full px-3.5 py-2 text-small font-semibold text-white"
       >
-        {t.deck.pass}
+        <X size={16} strokeWidth={2.5} /> {t.deck.pass}
       </motion.span>
     </motion.article>
   )

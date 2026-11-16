@@ -4,10 +4,12 @@ import { getMyPair } from '@/lib/pair'
 import { t } from '@/lib/strings/en'
 import { button, buttonQuiet, field, label, screen, title } from '@/components/ui/styles'
 import { createPair, goToCode, saveName } from './actions'
+import { PosterBackdrop } from '@/components/ui/poster-backdrop'
 
 export default function OnboardingPage() {
   return (
     <main className={screen}>
+      <PosterBackdrop />
       <Suspense>
         <Onboarding />
       </Suspense>

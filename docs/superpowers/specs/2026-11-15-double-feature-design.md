@@ -6,7 +6,7 @@ Requirements: [`docs/brief.md`](../../brief.md) (the original brief). This docum
 
 Two people (a couple) swipe through films and series on their own. The app tells them what they both want to watch. Matches have to show up fast, which is why the partner boost exists. The app should feel like a quiet cinema lobby, not a dashboard.
 
-**Anti-goals:** a UI that looks generated (gradients, glass, emoji, bubbly cards), a partner being able to see what the other liked before it's a match, and a TMDB key that reaches the browser.
+**Anti-goals:** a UI that looks generated (purple/blue gradients, emoji, stock dashboard layouts), a partner being able to see what the other liked before it's a match, and a TMDB key that reaches the browser.
 
 ## Approaches considered
 
@@ -75,11 +75,19 @@ supabase/migrations/  0001_init.sql …
 tests/                vitest; tests/db uses PGlite
 ```
 
-## Visual system (baseline set in M1, polished in M5)
+## Visual system: Apple Liquid Glass (user decision, 2026-11-15)
 
-- Background `#0d0d0c`, surface `#161614`, text `#eeeae2`, muted `#8a877f`, hairline `#2a2926`, accent amber `#e8a33d`. The accent is used only for like and the match moment.
-- Display: Instrument Serif (titles). UI: Geist. Scale: 13 / 16 / 28 / 44 px, with at most 3 sizes per screen.
-- Corners: 2px on cards and buttons. No shadows, no blur.
+This replaces the brief's "minimal, no glass, square" direction. The user found that look too square and asked for Apple's Liquid Glass and design system. Their choices: always dark, and SF Pro titles. They also chose to stay a website rather than build a native SwiftUI app, which is the only way to get Apple's real Liquid Glass.
+
+- **Colors:** Apple's dark system palette. Background `#000`, surface `#1c1c1e`, label `#fff`, secondary label `rgb(235 235 245 / .6)`. Accent systemOrange `#ff9f0a`, used only for like and the match moment. systemRed `#ff453a` only for destructive actions.
+- **Type:** `system-ui`, which is SF Pro on Apple devices (Apple doesn't license SF as a webfont) and Roboto/Segoe elsewhere. No webfonts. Ramp: caption 11 (tab labels), footnote 13, body 17, title 28 bold, large title 34 bold.
+- **Glass:** `glass` / `glass-accent` / `glass-thick` utilities in `globals.css`: backdrop blur + saturate, a lit top-left rim from inset shadows, and a soft inner glow. Glass is only on the control layer (tab bar, buttons, sheets), and posters stay sharp.
+  - On iPhone every browser is WebKit, so real refraction (SVG `backdrop-filter: url()`, Chromium-only) wouldn't show there. It's deliberately not done.
+- **Glass needs colour behind it:**
+  - The deck blurs the top card's poster into the background (`Ambient`).
+  - Screens without a card use a blurred grid of this week's trending posters (`PosterBackdrop`).
+- **Shapes:** card 28px radius, sheets 34px and inset from the edges, buttons as circles and capsules, grouped lists 16px. There's a floating capsule tab bar with icons and labels.
+- **Motion:** unchanged. Swipe physics, sheet slide-up, reduced motion respected.
 
 ## Left to the builder
 

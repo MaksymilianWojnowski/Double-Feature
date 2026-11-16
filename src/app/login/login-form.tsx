@@ -50,7 +50,7 @@ export function LoginForm() {
     return (
       <form onSubmit={verifyCode} className="flex flex-col gap-6">
         <div>
-          <h2 className="font-display text-title">{t.login.sentTitle}</h2>
+          <h2 className="text-title">{t.login.sentTitle}</h2>
           <p className="mt-2 text-muted">{t.login.sentBody}</p>
         </div>
         <label className="flex flex-col gap-1">

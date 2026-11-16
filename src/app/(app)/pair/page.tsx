@@ -1,6 +1,6 @@
 import { getMyPair } from '@/lib/pair'
 import { t } from '@/lib/strings/en'
-import { link, screen, title } from '@/components/ui/styles'
+import { PosterBackdrop } from '@/components/ui/poster-backdrop'
 import { InviteLink } from './invite-link'
 import { LeaveButton } from './leave-button'
 
@@ -11,31 +11,36 @@ export default async function PairPage() {
   const { data: stats } = await supabase.rpc('pair_stats').single<Stats>()
 
   return (
-    <main className={`${screen} pb-28`}>
-      <h1 className={title}>{t.pair.title}</h1>
-      <p className="mt-2 text-muted">{partner?.display_name ? t.pair.with(partner.display_name) : t.pair.waiting}</p>
+    // Not `screen`: bottom padding has to clear the floating tab bar, and two pb-* classes would fight.
+    <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col gap-8 px-6 pt-[max(3rem,env(safe-area-inset-top))] pb-[calc(6rem+env(safe-area-inset-bottom))]">
+      <PosterBackdrop />
+      <header>
+        <h1 className="text-hero">{t.pair.title}</h1>
+        <p className="mt-1 text-muted">{partner?.display_name ? t.pair.with(partner.display_name) : t.pair.waiting}</p>
+      </header>
 
       {!partner && pair && <InviteLink code={pair.invite_code} />}
 
       {partner && stats && (
-        <dl className="mt-12 grid grid-cols-2 gap-x-6 gap-y-8">
+        <dl className="glass grid grid-cols-2 gap-px overflow-hidden rounded-3xl">
           {[
             [t.pair.stats.you, stats.my_swipes],
             [t.pair.stats.partner(partner.display_name ?? ''), stats.partner_swipes],
             [t.pair.stats.matches, stats.matches],
             [t.pair.stats.watched, stats.watched],
           ].map(([term, value]) => (
-            <div key={String(term)}>
+            <div key={String(term)} className="px-5 py-4">
               <dt className="text-small text-muted">{term}</dt>
-              <dd className="mt-1 font-display text-title tabular-nums">{value}</dd>
+              <dd className="mt-0.5 text-title tabular-nums">{value}</dd>
             </div>
           ))}
         </dl>
       )}
 
-      <div className="mt-auto flex flex-col items-start gap-6 pt-16">
-        <form action="/auth/signout" method="post">
-          <button className={link}>{t.pair.signOut}</button>
+      {/* iOS grouped list: account actions at the bottom, destructive last. */}
+      <div className="mt-auto flex flex-col gap-3">
+        <form action="/auth/signout" method="post" className="glass overflow-hidden rounded-2xl">
+          <button className="w-full px-5 py-3.5 text-left text-body transition-colors active:bg-white/10">{t.pair.signOut}</button>
         </form>
         <LeaveButton />
       </div>

@@ -2,26 +2,28 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { GalleryVerticalEnd, UsersRound } from 'lucide-react'
 import { t } from '@/lib/strings/en'
 
 const items = [
-  { href: '/', label: t.nav.deck },
-  { href: '/pair', label: t.nav.pair },
+  { href: '/', label: t.nav.deck, Icon: GalleryVerticalEnd },
+  { href: '/pair', label: t.nav.pair, Icon: UsersRound },
 ] as const
 
-// Words, not icons: there are few enough destinations that labels are clearer.
+// Floating glass capsule, like iOS 26's tab bar. The active tab sits on a lighter glass pill.
 export function Nav() {
   const path = usePathname()
   return (
-    <nav className="fixed inset-x-0 bottom-0 border-t border-line bg-bg pb-[env(safe-area-inset-bottom)]">
-      <ul className="mx-auto flex max-w-sm justify-around">
-        {items.map(({ href, label }) => (
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <ul className="glass pointer-events-auto flex gap-1 rounded-full p-1">
+        {items.map(({ href, label, Icon }) => (
           <li key={href}>
             <Link
               href={href}
               aria-current={path === href ? 'page' : undefined}
-              className="block px-4 py-4 text-small text-muted aria-[current=page]:text-ink"
+              className="flex min-w-20 flex-col items-center gap-0.5 rounded-full px-5 py-1.5 text-caption text-muted transition-colors aria-[current=page]:bg-white/15 aria-[current=page]:text-ink"
             >
+              <Icon size={22} strokeWidth={2} aria-hidden />
               {label}
             </Link>
           </li>

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { getMyPair, pairErrorKey, type PairErrorKey } from '@/lib/pair'
 import { t } from '@/lib/strings/en'
 import { button, link, screen, title } from '@/components/ui/styles'
+import { PosterBackdrop } from '@/components/ui/poster-backdrop'
 
 async function joinPair(code: string) {
   'use server'
@@ -16,6 +17,7 @@ async function joinPair(code: string) {
 export default function JoinPage(props: PageProps<'/join/[code]'>) {
   return (
     <main className={screen}>
+      <PosterBackdrop />
       <Suspense>
         <Join {...props} />
       </Suspense>
