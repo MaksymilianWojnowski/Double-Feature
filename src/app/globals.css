@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* One palette, one accent, one strict type scale. Defaults are cleared so nothing off-system sneaks in. */
+@theme {
+  --color-*: initial;
+  --color-bg: #0d0d0c;
+  --color-surface: #161614;
+  --color-line: #2a2926;
+  --color-muted: #8a877f;
+  --color-ink: #eeeae2;
+  --color-accent: #e8a33d; /* like + the match moment only */
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --text-*: initial;
+  --text-small: 13px;
+  --text-small--line-height: 1.45;
+  --text-body: 16px;
+  --text-body--line-height: 1.5;
+  --text-title: 28px;
+  --text-title--line-height: 1.15;
+  --text-hero: 44px;
+  --text-hero--line-height: 1.02;
+
+  --radius-*: initial;
+  --radius-sm: 2px;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-instrument), ui-serif, Georgia, serif;
+}
+
+html {
+  color-scheme: dark;
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+}
+
+:focus-visible {
+  outline: 1px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
