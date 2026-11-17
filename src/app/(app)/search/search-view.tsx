@@ -77,10 +77,12 @@ export function SearchView() {
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col gap-5 px-4 pt-[max(3rem,env(safe-area-inset-top))] pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <h1 className="px-2 text-hero">{t.search.title}</h1>
 
-      <label className="glass flex h-11 items-center gap-2 rounded-full px-4">
+      <label className="glass flex h-11 items-center gap-2 rounded-full px-4 focus-within:outline-1 focus-within:outline-offset-2 focus-within:outline-white/40">
         <Search size={18} strokeWidth={2.25} className="shrink-0 text-muted" aria-hidden />
         <input
           type="search"
+          name="search" // "search" in the name keeps Safari from offering iCloud Passwords here
+          autoComplete="off"
           enterKeyHint="search"
           aria-label={t.search.title}
           placeholder={t.search.placeholder}

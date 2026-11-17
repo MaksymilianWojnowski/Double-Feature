@@ -88,9 +88,12 @@ body {
   min-height: 100dvh;
 }
 
-:focus-visible {
-  outline: 2px solid rgb(255 255 255 / 0.8);
-  outline-offset: 3px;
+/* In the base layer so a component's own focus style (e.g. outline-none on a field) can replace it. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid rgb(255 255 255 / 0.8);
+    outline-offset: 3px;
+  }
 }
 
 /* Bottom sheet: slides up on open. Native <dialog>, so no JS animation state. */

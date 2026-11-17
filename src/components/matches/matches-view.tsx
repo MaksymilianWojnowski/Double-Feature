@@ -113,7 +113,7 @@ export function MatchesView({
                 <select
                   value={view.sort}
                   onChange={(e) => setView((v) => ({ ...v, sort: e.target.value as MatchView['sort'] }))}
-                  className="h-full appearance-none bg-transparent pr-9 pl-4 text-small font-semibold text-ink outline-none"
+                  className="h-full appearance-none bg-transparent pr-9 pl-4 text-small font-semibold text-ink"
                 >
                   {(['newest', 'rating', 'runtime'] as const).map((s) => (
                     <option key={s} value={s} className="bg-surface">
