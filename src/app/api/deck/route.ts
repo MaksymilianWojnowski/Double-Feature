@@ -44,6 +44,14 @@ export async function GET(request: NextRequest) {
     page[t] = q.get('key') === key && Number.isInteger(saved) && saved > 0 ? saved : 1 // cursor from other settings: start over
   }
 
+  // Partner likes and recommendations don't depend on the discover walk: fetch them while it runs.
+  const boostP = partner ? partnerLikes(me.id) : Promise.resolve([])
+  boostP.catch(() => {}) // if the walk fails first we return early; this one's error is surfaced below
+  const recommendedP = recommendedFor(supabase, settings, types, language).catch((e) => {
+    console.warn('deck: recommendations skipped', e) // a bonus; never worth failing the deck over
+    return []
+  })
+
   const total: Partial<Record<MediaType, number>> = {}
   const fresh: Card[] = []
   const swiped = new Set<string>()
@@ -66,11 +74,7 @@ export async function GET(request: NextRequest) {
   }
 
   const done = types.every((t) => total[t] !== undefined && page[t] > total[t])
-  const boost = partner ? await partnerLikes(me.id) : []
-  const recommended = await recommendedFor(supabase, settings, types, language).catch((e) => {
-    console.warn('deck: recommendations skipped', e) // a bonus; never worth failing the deck over
-    return []
-  })
+  const [boost, recommended] = await Promise.all([boostP, recommendedP])
   const body: DeckResponse = {
     cards: buildDeck({ discovered: fresh, boost, recommended, swiped, exhausted: done }),
     cursor: { key, ...page },
