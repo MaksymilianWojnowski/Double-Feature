@@ -23,7 +23,7 @@ export async function createPair() {
   if (pairId && country && country !== 'PL' && (await watchRegions().catch((): string[] => [])).includes(country)) {
     await supabase.from('pair_settings').update({ region: country }).eq('pair_id', pairId)
   }
-  redirect('/pair')
+  redirect('/')
 }
 
 export async function goToCode(formData: FormData) {

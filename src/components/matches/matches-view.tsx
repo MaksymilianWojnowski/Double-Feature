@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Check, ChevronDown, Moon } from 'lucide-react'
@@ -10,6 +11,7 @@ import { viewMatches, type MatchItem, type MatchView } from '@/lib/matches'
 import { DetailsSheet } from '@/components/details/details-sheet'
 import { Segmented } from '@/components/ui/segmented'
 import { MatchActions, RemoveMatch } from './match-actions'
+import { button } from '@/components/ui/styles'
 import { TonightSheet } from './tonight-sheet'
 
 export type Patch = Partial<MatchItem> | 'removed'
@@ -19,11 +21,13 @@ export function MatchesView({
   region,
   hasServices,
   partnerName,
+  solo,
 }: {
   items: MatchItem[]
   region: string
   hasServices: boolean
   partnerName: string
+  solo: boolean // no partner yet: the empty state invites one instead
 }) {
   const t = useT()
   const locale = useLocale()
@@ -86,7 +90,12 @@ export function MatchesView({
       {live.length === 0 ? (
         <div className="glass mt-6 rounded-3xl p-6">
           <h2 className="text-title">{t.matches.emptyTitle}</h2>
-          <p className="mt-2 text-muted">{t.matches.emptyBody}</p>
+          <p className="mt-2 text-muted">{solo ? t.matches.soloBody : t.matches.emptyBody}</p>
+          {solo && (
+            <Link href="/pair" className={`${button} mt-5`}>
+              {t.matches.invite}
+            </Link>
+          )}
         </div>
       ) : (
         <>

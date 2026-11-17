@@ -93,9 +93,9 @@ Every later `git push` to `main` deploys automatically.
 
 **Before your first real use, check:**
 - [ ] All four env vars are set in Vercel. Without `SUPABASE_SECRET_KEY` the deck works but never mixes in your partner's likes.
-- [ ] Every file in `supabase/migrations` has been run, in order (`0001` … `0004`).
+- [ ] Every file in `supabase/migrations` has been run, in order (`0001` … `0005`).
 - [ ] Supabase's Site URL and Redirect URLs include the deployed address.
-- [ ] Both of you can sign in. Then one creates the pair on the **Pair** tab and sends the invite link.
+- [ ] Both of you can sign in. Each can start swiping solo; one sends the invite link from the **Pair** tab, and titles you both liked turn into matches when the other joins.
 - [ ] Set your services on **Settings** (the sliders icon on the deck).
 
 ### Optional extras (all free)

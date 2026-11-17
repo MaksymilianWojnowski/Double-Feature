@@ -72,7 +72,7 @@ export default async function MatchesPage() {
   return (
     <>
       <PosterBackdrop />
-      <MatchesView items={items} region={region} hasServices={ours.size > 0} partnerName={partner?.display_name ?? ''} />
+      <MatchesView items={items} region={region} hasServices={ours.size > 0} partnerName={partner?.display_name ?? ''} solo={!partner} />
     </>
   )
 }

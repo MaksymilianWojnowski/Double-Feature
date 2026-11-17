@@ -16,7 +16,7 @@ export function InviteLink({ code }: { code: string }) {
   async function send() {
     const url = `${window.location.origin}/join/${code}`
     if (canShare) {
-      await navigator.share({ title: t.app.name, url }).catch(() => {}) // dismissed share sheet
+      await navigator.share({ title: t.app.name, text: t.pair.shareText, url }).catch(() => {}) // dismissed share sheet
     } else {
       await navigator.clipboard.writeText(url)
       setCopied(true)
