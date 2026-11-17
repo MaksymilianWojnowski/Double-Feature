@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence } from 'motion/react'
 import { SlidersHorizontal } from 'lucide-react'
-import { t } from '@/lib/strings/en'
+import { useT } from '@/lib/i18n/client'
 import { buttonQuiet, iconButton } from '@/components/ui/styles'
 import { DetailsSheet } from '@/components/details/details-sheet'
 import type { Card, TitleDetails } from '@/lib/tmdb/types'
@@ -26,6 +26,7 @@ const KEYS: Record<string, Decision | 'undo' | 'open'> = {
 const loaded = (d: TitleDetails | 'error' | undefined) => (typeof d === 'object' ? d : undefined)
 
 export function Deck() {
+  const t = useT()
   const deck = useDeck({ onMatch: useMatchMoment() })
   const [open, setOpen] = useState<Card | null>(null)
   const top = deck.queue[0]
@@ -91,6 +92,7 @@ export function Deck() {
 }
 
 function EmptyState({ deck }: { deck: ReturnType<typeof useDeck> }) {
+  const t = useT()
   if (deck.error) {
     return (
       <Placeholder title={t.deck.errorTitle} body={t.deck.errorBody}>

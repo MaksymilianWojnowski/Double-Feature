@@ -3,7 +3,7 @@
 import { useRef } from 'react'
 import { motion, useMotionValue, useReducedMotion, useTransform, type PanInfo } from 'motion/react'
 import { Heart, X } from 'lucide-react'
-import { t } from '@/lib/strings/en'
+import { useT } from '@/lib/i18n/client'
 import { logoSrc, POSTER_SIZES, posterSrc, posterSrcSet } from '@/lib/tmdb/images'
 import type { Card, TitleDetails } from '@/lib/tmdb/types'
 import type { Decision } from './use-deck'
@@ -36,6 +36,7 @@ export function SwipeCard({
   onDecide: (d: Decision) => void
   onOpen: () => void
 }) {
+  const t = useT()
   const reduce = useReducedMotion()
   const dragged = useRef(false) // a drag's pointer-up must not count as a tap that opens details
   const open = () => !dragged.current && onOpen()
@@ -94,7 +95,7 @@ export function SwipeCard({
             {card.title}
           </button>
         </h2>
-        <p className="mt-1 text-small text-white/70">{metaLine(card, details)}</p>
+        <p className="mt-1 text-small text-white/70">{metaLine(t, card, details)}</p>
         {providers.length > 0 && (
           <div className="mt-3 flex items-center gap-1.5">
             {providers.map((p) => (

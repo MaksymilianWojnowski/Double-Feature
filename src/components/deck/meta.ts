@@ -1,8 +1,8 @@
-import { t } from '@/lib/strings/en'
+import type { Strings } from '@/lib/strings'
 import type { Card, TitleDetails } from '@/lib/tmdb/types'
 
 /** "2019 · Film · 2h 12m · TMDB 7.8": the parts known so far. */
-export function metaLine(card: Card, d?: Pick<TitleDetails, 'runtime' | 'seasons' | 'rating' | 'voteCount'>) {
+export function metaLine(t: Strings, card: Card, d?: Pick<TitleDetails, 'runtime' | 'seasons' | 'rating' | 'voteCount'>) {
   return [
     card.year,
     t.title[card.mediaType],

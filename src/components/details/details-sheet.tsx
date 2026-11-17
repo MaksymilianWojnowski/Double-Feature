@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Play, X } from 'lucide-react'
-import { t } from '@/lib/strings/en'
+import { useT } from '@/lib/i18n/client'
 import { logoSrc } from '@/lib/tmdb/images'
 import type { Card, Provider, TitleDetails } from '@/lib/tmdb/types'
 import { metaLine } from '@/components/deck/meta'
@@ -23,6 +23,7 @@ export function DetailsSheet({
   actions?: React.ReactNode // under the header, e.g. a match's Watched + ratings
   footer?: React.ReactNode // last, e.g. a destructive action
 }) {
+  const t = useT()
   const ref = useRef<HTMLDialogElement>(null)
   const [trailer, setTrailer] = useState(false)
 
@@ -52,7 +53,7 @@ export function DetailsSheet({
                 <h2 id="details-title" className="text-title text-balance">
                   {card.title}
                 </h2>
-                <p className="mt-1 text-small text-muted">{metaLine(card, d)}</p>
+                <p className="mt-1 text-small text-muted">{metaLine(t, card, d)}</p>
                 {d?.genres.length ? <p className="text-small text-muted">{d.genres.join(', ')}</p> : null}
               </div>
               <button type="button" onClick={() => ref.current?.close()} aria-label={t.title.close} className={`${iconButton} size-9 shrink-0`} autoFocus>

@@ -1,4 +1,4 @@
-// Every user-facing string. A Polish file later: `export const pl: Strings = { ... }`.
+// Every user-facing string, English. The source for the other languages (./pl.ts etc.), which must match its shape.
 export const t = {
   app: {
     name: 'Double Feature',
@@ -67,23 +67,6 @@ export const t = {
     western: 'Western',
     reality: 'Reality',
   },
-  languages: {
-    en: 'English',
-    pl: 'Polish',
-    pt: 'Portuguese',
-    es: 'Spanish',
-    fr: 'French',
-    de: 'German',
-    it: 'Italian',
-    ko: 'Korean',
-    ja: 'Japanese',
-    zh: 'Chinese',
-    hi: 'Hindi',
-    sv: 'Swedish',
-    da: 'Danish',
-    no: 'Norwegian',
-    tr: 'Turkish',
-  } as Record<string, string>,
   errors: {
     title: 'Something went wrong',
     body: 'This screen didn’t load. Check your connection and try again.',
@@ -109,6 +92,9 @@ export const t = {
     liked: 'Liked',
     passed: 'You passed',
     seen: 'Seen',
+  },
+  push: {
+    body: (title: string) => `You both want to watch ${title}.`,
   },
   match: {
     title: 'It’s a match',
@@ -197,6 +183,12 @@ export const t = {
       matches: 'Matches',
       watched: 'Watched',
     },
+    language: 'Language',
+    notifications: 'Match notifications',
+    notificationsHint: 'Get notified when you both like the same title.',
+    notificationsInstall: 'On iPhone, add Double Feature to your Home Screen first: Share → Add to Home Screen.',
+    notificationsBlocked: 'Notifications are blocked. Allow them in your browser or phone settings.',
+    notificationsError: 'Couldn’t turn on notifications. Try again.',
     signOut: 'Sign out',
     leave: 'Leave pair',
     leaveConfirm:
@@ -233,7 +225,7 @@ export const t = {
   title: {
     movie: 'Film',
     tv: 'Series',
-    runtime: (min: number) => (min >= 60 ? `${Math.floor(min / 60)}h ${min % 60}m` : `${min}m`),
+    runtime: (min: number) => (min >= 60 ? `${Math.floor(min / 60)}h${min % 60 ? ` ${min % 60}m` : ''}` : `${min}m`),
     seasons: (n: number) => (n === 1 ? '1 season' : `${n} seasons`),
     rating: (r: number) => `TMDB ${r.toFixed(1)}`,
     directedBy: 'Directed by',

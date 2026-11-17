@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Check, ChevronDown, Moon } from 'lucide-react'
-import { t } from '@/lib/strings/en'
+import { useLocale, useT } from '@/lib/i18n/client'
 import { posterSrc } from '@/lib/tmdb/images'
 import type { TitleDetails } from '@/lib/tmdb/types'
 import { viewMatches, type MatchItem, type MatchView } from '@/lib/matches'
@@ -25,6 +25,8 @@ export function MatchesView({
   hasServices: boolean
   partnerName: string
 }) {
+  const t = useT()
+  const locale = useLocale()
   const router = useRouter()
   const params = useSearchParams()
   const [view, setView] = useState<MatchView>({ type: 'all', onOurServices: false, sort: 'newest' })
@@ -52,11 +54,11 @@ export function MatchesView({
     if (!open || requested.current.has(open.key)) return
     requested.current.add(open.key)
     const key = open.key
-    fetch(`/api/titles/${open.mediaType}/${open.tmdbId}?region=${region}`)
+    fetch(`/api/titles/${open.mediaType}/${open.tmdbId}?region=${region}&lang=${locale}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d: TitleDetails) => setDetails((all) => ({ ...all, [key]: d })))
       .catch(() => setDetails((all) => ({ ...all, [key]: 'error' })))
-  }, [open, region])
+  }, [open, region, locale])
 
   const select = (m: MatchItem) => setSelected(m.key)
 

@@ -3,6 +3,7 @@ import { getMyPair } from '@/lib/pair'
 import { searchTitles } from '@/lib/tmdb/client'
 import { TmdbError } from '@/lib/tmdb/fetch-retry'
 import { cardKey, type Card } from '@/lib/tmdb/types'
+import { LOCALE_TAGS, requestLocale } from '@/lib/i18n/locales'
 
 export type SearchResult = Card & { decision: 'like' | 'pass' | 'seen' | null }
 export type SearchResponse = { results: SearchResult[]; region: string }
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const [cards, { data: settings }] = await Promise.all([
-      searchTitles(q), // lowercased: one cache entry per query regardless of how it was typed
+      searchTitles(q, LOCALE_TAGS[requestLocale(request)]), // lowercased: one cache entry per query regardless of how it was typed
       supabase.from('pair_settings').select('region').maybeSingle<{ region: string }>(),
     ])
     const ids = [...new Set(cards.map((c) => c.tmdbId))]

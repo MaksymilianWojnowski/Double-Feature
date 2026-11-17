@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/browser'
 import { preloadPoster } from '@/lib/tmdb/images'
 import type { Card, TitleDetails } from '@/lib/tmdb/types'
 import type { DeckResponse } from '@/app/api/deck/route'
-import { t } from '@/lib/strings/en'
+import { useLocale, useT } from '@/lib/i18n/client'
 
 export type Decision = 'like' | 'pass' | 'seen'
 export type Match = { id: number; tmdb_id: number; media_type: Card['mediaType']; title: string; poster_path: string | null; year: number | null }
@@ -29,6 +29,8 @@ const saveCursor = (c: Cursor | null) => {
 }
 
 export function useDeck({ onMatch }: { onMatch?: (m: Match) => void } = {}) {
+  const t = useT()
+  const locale = useLocale()
   const supabase = useMemo(() => createClient(), [])
   const [queue, setQueue] = useState<Card[]>([])
   const [details, setDetails] = useState<Record<string, TitleDetails | 'error'>>({})
@@ -83,12 +85,12 @@ export function useDeck({ onMatch }: { onMatch?: (m: Match) => void } = {}) {
       if (requested.current.has(card.key)) continue
       requested.current.add(card.key)
       preloadPoster(card.posterPath)
-      fetch(`/api/titles/${card.mediaType}/${card.tmdbId}?region=${region}`)
+      fetch(`/api/titles/${card.mediaType}/${card.tmdbId}?region=${region}&lang=${locale}`)
         .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
         .then((d: TitleDetails) => setDetails((all) => ({ ...all, [card.key]: d })))
         .catch(() => setDetails((all) => ({ ...all, [card.key]: 'error' })))
     }
-  }, [queue, region])
+  }, [queue, region, locale])
 
   const queueRef = useRef(queue)
   const lastRef = useRef(last)
@@ -125,7 +127,7 @@ export function useDeck({ onMatch }: { onMatch?: (m: Match) => void } = {}) {
       setQueue((q) => q.filter((c) => c.key !== card.key))
       setLast({ card, decision, saved })
     },
-    [supabase],
+    [supabase, t],
   )
 
   const undo = useCallback(async () => {
@@ -137,7 +139,7 @@ export function useDeck({ onMatch }: { onMatch?: (m: Match) => void } = {}) {
     await l.saved // never delete before the insert landed
     const { error } = await supabase.from('swipes').delete().eq('tmdb_id', l.card.tmdbId).eq('media_type', l.card.mediaType)
     if (error) setNotice(t.deck.saveError)
-  }, [supabase])
+  }, [supabase, t])
 
   useEffect(() => {
     if (!notice) return

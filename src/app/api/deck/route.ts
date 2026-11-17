@@ -9,6 +9,7 @@ import { buildDeck } from '@/lib/deck/build-deck'
 import { discoverParams, settingsKey, type PairSettings } from '@/lib/deck/discover-params'
 import { DECK_BATCH, MAX_PAGES_PER_REQUEST, RECOMMEND_CHECKED, RECOMMEND_SEEDS } from '@/lib/deck/config'
 import { needsDetails, passesDetails, passesFilters } from '@/lib/deck/recommend'
+import { LOCALE_TAGS, requestLocale } from '@/lib/i18n/locales'
 
 export type DeckResponse = {
   cards: Card[]
@@ -31,6 +32,7 @@ export async function GET(request: NextRequest) {
   if (error || !settings) throw error ?? new Error('pair_settings missing')
 
   const key = settingsKey(settings)
+  const language = LOCALE_TAGS[requestLocale(request)]
   const q = request.nextUrl.searchParams
   // Types the genre filter rules out entirely (e.g. series when only Horror is chosen) aren't fetched at all.
   const types = (settings.content_type === 'both' ? (['movie', 'tv'] as MediaType[]) : [settings.content_type]).filter(
@@ -49,7 +51,7 @@ export async function GET(request: NextRequest) {
     for (let walked = 0; walked < MAX_PAGES_PER_REQUEST && fresh.length < DECK_BATCH; walked++) {
       const active = types.filter((t) => page[t] <= (total[t] ?? 500))
       if (!active.length) break
-      const pages = await Promise.all(active.map((t) => discover(t, discoverParams(settings, t, page[t])!)))
+      const pages = await Promise.all(active.map((t) => discover(t, discoverParams(settings, t, page[t])!, language)))
       active.forEach((t, i) => {
         total[t] = pages[i].totalPages
         page[t]++
@@ -65,7 +67,7 @@ export async function GET(request: NextRequest) {
 
   const done = types.every((t) => total[t] !== undefined && page[t] > total[t])
   const boost = partner ? await partnerLikes(me.id) : []
-  const recommended = await recommendedFor(supabase, settings, types).catch((e) => {
+  const recommended = await recommendedFor(supabase, settings, types, language).catch((e) => {
     console.warn('deck: recommendations skipped', e) // a bonus; never worth failing the deck over
     return []
   })
@@ -95,7 +97,7 @@ async function swipedKeys(supabase: SupabaseClient, cards: Card[]): Promise<stri
 }
 
 /** Unswiped titles like the user's most recent likes (TMDB recommendations), under the pair's filters. */
-async function recommendedFor(supabase: SupabaseClient, settings: PairSettings, types: MediaType[]): Promise<Card[]> {
+async function recommendedFor(supabase: SupabaseClient, settings: PairSettings, types: MediaType[], language: string): Promise<Card[]> {
   if (!types.length) return []
   const { data: seeds, error } = await supabase // RLS: own swipes
     .from('swipes')
@@ -106,13 +108,13 @@ async function recommendedFor(supabase: SupabaseClient, settings: PairSettings, 
     .limit(RECOMMEND_SEEDS)
   if (error) throw error
   if (!seeds.length) return []
-  const lists = await Promise.all(seeds.map((s) => recommendations(s.media_type, s.tmdb_id)))
+  const lists = await Promise.all(seeds.map((s) => recommendations(s.media_type, s.tmdb_id, language)))
   let picks = interleave(lists).filter((r) => passesFilters(r, settings))
   const swiped = new Set(await swipedKeys(supabase, picks))
   picks = picks.filter((r) => !swiped.has(r.key))
   if (needsDetails(settings)) {
     picks = picks.slice(0, RECOMMEND_CHECKED)
-    const found = await Promise.all(picks.map((r) => details(r.mediaType, r.tmdbId).catch(() => null)))
+    const found = await Promise.all(picks.map((r) => details(r.mediaType, r.tmdbId, language).catch(() => null)))
     picks = picks.filter((_, i) => found[i] && passesDetails(found[i], settings))
   }
   return picks.map(({ key, tmdbId, mediaType, title, year, posterPath }) => ({ key, tmdbId, mediaType, title, year, posterPath }))

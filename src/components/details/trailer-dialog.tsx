@@ -2,11 +2,12 @@
 
 import { useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
-import { t } from '@/lib/strings/en'
+import { useT } from '@/lib/i18n/client'
 import { iconButton } from '@/components/ui/styles'
 
 /** YouTube trailer in a modal. The iframe exists only while open, so closing stops playback. */
 export function TrailerDialog({ videoKey, title, onClose }: { videoKey: string | null; title: string; onClose: () => void }) {
+  const t = useT()
   const ref = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {

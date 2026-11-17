@@ -1,5 +1,5 @@
 import { Heart, RotateCcw, X } from 'lucide-react'
-import { t } from '@/lib/strings/en'
+import { useT } from '@/lib/i18n/client'
 import { iconButton } from '@/components/ui/styles'
 import type { Decision } from './use-deck'
 
@@ -15,6 +15,7 @@ export function ActionBar({
   canUndo: boolean
   disabled: boolean
 }) {
+  const t = useT()
   return (
     <div className="flex items-center justify-center gap-4 py-4">
       <button type="button" onClick={onUndo} disabled={!canUndo} aria-label={t.deck.undo} className={`${iconButton} size-11 text-white/80`}>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Shuffle, X } from 'lucide-react'
-import { t } from '@/lib/strings/en'
+import { useT } from '@/lib/i18n/client'
 import { posterSrc } from '@/lib/tmdb/images'
 import { matchFacts, pickTonight, type MatchItem } from '@/lib/matches'
 import { metaLine } from '@/components/deck/meta'
@@ -12,6 +12,7 @@ const LIMITS = [undefined, 90, 120, 150] as const
 
 /** One random unwatched match, optionally capped by runtime. Mounted only while open. */
 export function TonightSheet({ items, onClose, onView }: { items: MatchItem[]; onClose: () => void; onView: (m: MatchItem) => void }) {
+  const t = useT()
   const ref = useRef<HTMLDialogElement>(null)
   const [max, setMax] = useState<number | undefined>()
   const [pick, setPick] = useState(() => pickTonight(items, {}))
@@ -52,7 +53,7 @@ export function TonightSheet({ items, onClose, onView }: { items: MatchItem[]; o
               }}
               className="glass h-9 rounded-full px-4 text-small font-semibold text-muted transition aria-checked:bg-ink aria-checked:text-bg"
             >
-              {limit ? `${t.matches.maxRuntime} ${t.title.runtime(limit).replace(' 0m', '')}` : t.matches.runtimeAny}
+              {limit ? `${t.matches.maxRuntime} ${t.title.runtime(limit)}` : t.matches.runtimeAny}
             </button>
           ))}
         </div>
@@ -67,7 +68,7 @@ export function TonightSheet({ items, onClose, onView }: { items: MatchItem[]; o
             </div>
             <div>
               <p className="text-title text-balance">{pick.title}</p>
-              <p className="mt-1 text-small text-muted">{metaLine(pick, matchFacts(pick))}</p>
+              <p className="mt-1 text-small text-muted">{metaLine(t, pick, matchFacts(pick))}</p>
             </div>
             <div className="flex w-full flex-col gap-3">
               <button type="button" className={button} onClick={() => onView(pick)}>

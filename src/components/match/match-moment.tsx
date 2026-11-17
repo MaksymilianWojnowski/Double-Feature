@@ -3,13 +3,14 @@
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, useReducedMotion } from 'motion/react'
-import { t } from '@/lib/strings/en'
+import { useT } from '@/lib/i18n/client'
 import { posterSrc } from '@/lib/tmdb/images'
 import { button, buttonQuiet } from '@/components/ui/styles'
 import type { Match } from '@/components/deck/use-deck'
 
 /** The match moment: poster, "It's a match", two choices. Restrained on purpose: no confetti. */
 export function MatchMoment({ match, onDone }: { match: Match | null; onDone: () => void }) {
+  const t = useT()
   const ref = useRef<HTMLDialogElement>(null)
   const router = useRouter()
   const reduce = useReducedMotion()

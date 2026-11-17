@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check, Star } from 'lucide-react'
-import { t } from '@/lib/strings/en'
+import { useT } from '@/lib/i18n/client'
 import { createClient } from '@/lib/supabase/browser'
 import type { MatchItem } from '@/lib/matches'
 import { button, link } from '@/components/ui/styles'
@@ -11,6 +11,7 @@ import type { Patch } from './matches-view'
 
 /** Optimistic: patch the list, write under RLS, revert and say so if the write fails. */
 function useMatchWrite(match: MatchItem, onPatch: (id: number, p: Patch) => void) {
+  const t = useT()
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
   const [error, setError] = useState('')
@@ -27,6 +28,7 @@ function useMatchWrite(match: MatchItem, onPatch: (id: number, p: Patch) => void
 }
 
 export function MatchActions({ match, partnerName, onPatch }: { match: MatchItem; partnerName: string; onPatch: (id: number, p: Patch) => void }) {
+  const t = useT()
   const { write, error } = useMatchWrite(match, onPatch)
 
   const toggleWatched = () => {
@@ -66,6 +68,7 @@ export function MatchActions({ match, partnerName, onPatch }: { match: MatchItem
 }
 
 function Stars({ label, value, onRate }: { label: string; value: number | null; onRate?: (n: number) => void }) {
+  const t = useT()
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3">
       <span className="text-body">{label}</span>
@@ -92,6 +95,7 @@ function Stars({ label, value, onRate }: { label: string; value: number | null; 
 }
 
 export function RemoveMatch({ match, onPatch }: { match: MatchItem; onPatch: (id: number, p: Patch) => void }) {
+  const t = useT()
   const { write, error } = useMatchWrite(match, onPatch)
   const [confirming, setConfirming] = useState(false)
 

@@ -5,12 +5,13 @@ import { mergeProviders, type RawWatchProvider } from './providers'
 import { cardKey, type Card, type Details, type MediaType, type Provider, type RecTitle, type RegionProviders } from './types'
 
 const BASE = 'https://api.themoviedb.org/3'
-const LANGUAGE = 'en-US' // follows the UI language
+/** Default TMDB language (BCP 47) where the text doesn't matter, e.g. poster paths and provider names. */
+const EN = 'en-US'
 
-async function get<T>(path: string, params: Record<string, string> = {}): Promise<T> {
+async function get<T>(path: string, params: Record<string, string> = {}, language = EN): Promise<T> {
   const token = process.env.TMDB_ACCESS_TOKEN
   if (!token) throw new Error('TMDB_ACCESS_TOKEN is not set')
-  const qs = new URLSearchParams({ language: LANGUAGE, ...params })
+  const qs = new URLSearchParams({ language, ...params })
   const res = await fetchWithRetry(`${BASE}${path}?${qs}`, {
     headers: { Authorization: `Bearer ${token}`, accept: 'application/json' },
   })
@@ -38,10 +39,10 @@ const toCard = (type: MediaType, r: RawTitle): Card => ({
 })
 
 /** One discover page as cards (posterless titles dropped: the poster is the card). Cached 1h. */
-export async function discover(type: MediaType, params: Record<string, string>) {
+export async function discover(type: MediaType, params: Record<string, string>, language: string) {
   'use cache: remote'
   cacheLife('hours')
-  const raw = await get<{ total_pages: number; results: RawTitle[] }>(`/discover/${type}`, params)
+  const raw = await get<{ total_pages: number; results: RawTitle[] }>(`/discover/${type}`, params, language)
   return {
     totalPages: Math.min(raw.total_pages, 500), // TMDB refuses pages past 500
     cards: raw.results.filter((r) => r.poster_path).map((r) => toCard(type, r)),
@@ -61,11 +62,11 @@ export async function providers(region: string): Promise<Provider[]> {
 }
 
 /** TMDB's "more like this" for one title (first page), with the fields the deck filters on. Cached 24h. */
-export async function recommendations(type: MediaType, id: number): Promise<RecTitle[]> {
+export async function recommendations(type: MediaType, id: number, language: string): Promise<RecTitle[]> {
   'use cache: remote'
   cacheLife('days')
   type Raw = RawTitle & { genre_ids?: number[]; vote_average: number; vote_count: number; original_language: string; adult?: boolean }
-  const raw = await get<{ results: Raw[] }>(`/${type}/${id}/recommendations`)
+  const raw = await get<{ results: Raw[] }>(`/${type}/${id}/recommendations`, {}, language)
   return raw.results
     .filter((r) => r.poster_path && !r.adult)
     .map((r) => ({ ...toCard(type, r), genreIds: r.genre_ids ?? [], rating: r.vote_average, votes: r.vote_count, language: r.original_language }))
@@ -80,10 +81,10 @@ export async function watchRegions(): Promise<string[]> {
 }
 
 /** Films and series matching a title query (people dropped, posterless dropped). Cached 1h. */
-export async function searchTitles(query: string): Promise<Card[]> {
+export async function searchTitles(query: string, language: string): Promise<Card[]> {
   'use cache: remote'
   cacheLife('hours')
-  const raw = await get<{ results: (RawTitle & { media_type: string })[] }>('/search/multi', { query, include_adult: 'false' })
+  const raw = await get<{ results: (RawTitle & { media_type: string })[] }>('/search/multi', { query, include_adult: 'false' }, language)
   return raw.results
     .filter((r): r is RawTitle & { media_type: MediaType } => (r.media_type === 'movie' || r.media_type === 'tv') && !!r.poster_path)
     .map((r) => toCard(r.media_type, r))
@@ -125,14 +126,17 @@ type RawDetails = RawTitle & {
 const toProviders = (list: RawProvider[] = []): Provider[] =>
   list.map((p) => ({ id: p.provider_id, name: p.provider_name, logoPath: p.logo_path }))
 
-/** Everything the card and details sheet need, for every region. Cached 24h. */
-export async function details(type: MediaType, id: number): Promise<Details> {
+/** Everything the card and details sheet need, for every region, in `language` (BCP 47). Cached 24h. */
+export async function details(type: MediaType, id: number, language: string = EN): Promise<Details> {
   'use cache: remote'
   cacheLife('days')
-  const d = await get<RawDetails>(`/${type}/${id}`, {
-    append_to_response: 'credits,videos,watch/providers',
-    include_video_language: 'en,null',
-  })
+  const d = await get<RawDetails>(
+    `/${type}/${id}`,
+    { append_to_response: 'credits,videos,watch/providers', include_video_language: `${language.slice(0, 2)},en,null` },
+    language,
+  )
+  // Many titles have no synopsis in smaller languages; English beats an empty sheet.
+  if (!d.overview && language !== EN) d.overview = (await details(type, id, EN)).overview
 
   const videos = (d.videos?.results ?? []).filter((v) => v.site === 'YouTube')
   const trailer =
