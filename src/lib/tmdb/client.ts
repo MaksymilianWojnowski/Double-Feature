@@ -2,7 +2,7 @@ import 'server-only'
 import { cacheLife } from 'next/cache'
 import { fetchWithRetry } from './fetch-retry'
 import { mergeProviders, type RawWatchProvider } from './providers'
-import { cardKey, type Card, type Details, type MediaType, type Provider, type RegionProviders } from './types'
+import { cardKey, type Card, type Details, type MediaType, type Provider, type RecTitle, type RegionProviders } from './types'
 
 const BASE = 'https://api.themoviedb.org/3'
 const LANGUAGE = 'en-US' // follows the UI language
@@ -58,6 +58,25 @@ export async function providers(region: string): Promise<Provider[]> {
     ),
   )
   return mergeProviders(lists, region)
+}
+
+/** TMDB's "more like this" for one title (first page), with the fields the deck filters on. Cached 24h. */
+export async function recommendations(type: MediaType, id: number): Promise<RecTitle[]> {
+  'use cache: remote'
+  cacheLife('days')
+  type Raw = RawTitle & { genre_ids?: number[]; vote_average: number; vote_count: number; original_language: string; adult?: boolean }
+  const raw = await get<{ results: Raw[] }>(`/${type}/${id}/recommendations`)
+  return raw.results
+    .filter((r) => r.poster_path && !r.adult)
+    .map((r) => ({ ...toCard(type, r), genreIds: r.genre_ids ?? [], rating: r.vote_average, votes: r.vote_count, language: r.original_language }))
+}
+
+/** Countries TMDB has streaming data for (ISO 3166-1 codes, e.g. "PL"). Cached 24h. */
+export async function watchRegions(): Promise<string[]> {
+  'use cache: remote'
+  cacheLife('days')
+  const raw = await get<{ results: { iso_3166_1: string }[] }>('/watch/providers/regions')
+  return raw.results.map((r) => r.iso_3166_1)
 }
 
 /** Films and series matching a title query (people dropped, posterless dropped). Cached 1h. */

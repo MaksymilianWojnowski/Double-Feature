@@ -13,11 +13,11 @@ import { Segmented } from '@/components/ui/segmented'
 import { Switch } from '@/components/ui/switch'
 import { iconButton, link } from '@/components/ui/styles'
 
-const REGIONS = ['PL', 'BR'] as const
 const PROVIDERS_SHOWN = 20
+const LOCALE = 'en'
 const thisYear = new Date().getFullYear()
 
-export function SettingsForm({ pairId, initial }: { pairId: string; initial: PairSettings }) {
+export function SettingsForm({ pairId, initial, regions }: { pairId: string; initial: PairSettings; regions: string[] }) {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
   const [s, setS] = useState(initial)
@@ -62,12 +62,11 @@ export function SettingsForm({ pairId, initial }: { pairId: string; initial: Pai
       </Section>
 
       <Section title={t.settings.region}>
-        <Segmented
-          label={t.settings.region}
-          value={s.region}
-          onChange={(region) => save({ region })}
-          options={REGIONS.map((value) => ({ value, label: t.settings.regions[value] }))}
-        />
+        <div className="glass rounded-2xl">
+          <Row label={t.settings.region}>
+            <Select value={s.region} options={regionOptions(regions, s.region)} onChange={(region) => save({ region })} />
+          </Row>
+        </div>
       </Section>
 
       <Section title={t.settings.services} hint={t.settings.servicesHint}>
@@ -157,6 +156,14 @@ export function SettingsForm({ pairId, initial }: { pairId: string; initial: Pai
   )
 }
 
+/** Country names in the UI language, alphabetical; the saved region is always listed. */
+function regionOptions(codes: string[], current: string) {
+  const names = new Intl.DisplayNames([LOCALE], { type: 'region' })
+  return [...new Set([...codes, current])]
+    .map((code) => [code, names.of(code) ?? code])
+    .sort((a, b) => a[1].localeCompare(b[1], LOCALE))
+}
+
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-2.5">
@@ -185,7 +192,7 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
 function Select({ value, options, onChange }: { value: string; options: string[][]; onChange: (v: string) => void }) {
   return (
     <label className="relative flex items-center">
-      <select value={value} onChange={(e) => onChange(e.target.value)} className="appearance-none bg-transparent py-1 pr-6 text-right text-body text-muted outline-none">
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="appearance-none bg-transparent py-1 pr-6 text-right text-body text-muted">
         {options.map(([v, label]) => (
           <option key={v} value={v} className="bg-surface text-ink">
             {label}

@@ -2,12 +2,13 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getMyPair } from '@/lib/pair'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { discover } from '@/lib/tmdb/client'
+import { details, discover, recommendations } from '@/lib/tmdb/client'
 import { TmdbError } from '@/lib/tmdb/fetch-retry'
 import { cardKey, type Card, type MediaType } from '@/lib/tmdb/types'
 import { buildDeck } from '@/lib/deck/build-deck'
 import { discoverParams, settingsKey, type PairSettings } from '@/lib/deck/discover-params'
-import { DECK_BATCH, MAX_PAGES_PER_REQUEST } from '@/lib/deck/config'
+import { DECK_BATCH, MAX_PAGES_PER_REQUEST, RECOMMEND_CHECKED, RECOMMEND_SEEDS } from '@/lib/deck/config'
+import { needsDetails, passesDetails, passesFilters } from '@/lib/deck/recommend'
 
 export type DeckResponse = {
   cards: Card[]
@@ -64,8 +65,12 @@ export async function GET(request: NextRequest) {
 
   const done = types.every((t) => total[t] !== undefined && page[t] > total[t])
   const boost = partner ? await partnerLikes(me.id) : []
+  const recommended = await recommendedFor(supabase, settings, types).catch((e) => {
+    console.warn('deck: recommendations skipped', e) // a bonus; never worth failing the deck over
+    return []
+  })
   const body: DeckResponse = {
-    cards: buildDeck({ discovered: fresh, boost, swiped, exhausted: done }),
+    cards: buildDeck({ discovered: fresh, boost, recommended, swiped, exhausted: done }),
     cursor: { key, ...page },
     done,
     region: settings.region,
@@ -74,8 +79,8 @@ export async function GET(request: NextRequest) {
 }
 
 /** Round-robin merge, so "both" alternates films and series. */
-function interleave(lists: Card[][]): Card[] {
-  const out: Card[] = []
+function interleave<T extends Card>(lists: T[][]): T[] {
+  const out: T[] = []
   for (let i = 0; i < Math.max(0, ...lists.map((l) => l.length)); i++) for (const l of lists) if (l[i]) out.push(l[i])
   return out
 }
@@ -87,6 +92,30 @@ async function swipedKeys(supabase: SupabaseClient, cards: Card[]): Promise<stri
   const { data, error } = await supabase.from('swipes').select('tmdb_id, media_type').in('tmdb_id', ids)
   if (error) throw error
   return data.map((r) => cardKey(r.media_type, r.tmdb_id))
+}
+
+/** Unswiped titles like the user's most recent likes (TMDB recommendations), under the pair's filters. */
+async function recommendedFor(supabase: SupabaseClient, settings: PairSettings, types: MediaType[]): Promise<Card[]> {
+  if (!types.length) return []
+  const { data: seeds, error } = await supabase // RLS: own swipes
+    .from('swipes')
+    .select('tmdb_id, media_type')
+    .eq('decision', 'like')
+    .in('media_type', types)
+    .order('created_at', { ascending: false })
+    .limit(RECOMMEND_SEEDS)
+  if (error) throw error
+  if (!seeds.length) return []
+  const lists = await Promise.all(seeds.map((s) => recommendations(s.media_type, s.tmdb_id)))
+  let picks = interleave(lists).filter((r) => passesFilters(r, settings))
+  const swiped = new Set(await swipedKeys(supabase, picks))
+  picks = picks.filter((r) => !swiped.has(r.key))
+  if (needsDetails(settings)) {
+    picks = picks.slice(0, RECOMMEND_CHECKED)
+    const found = await Promise.all(picks.map((r) => details(r.mediaType, r.tmdbId).catch(() => null)))
+    picks = picks.filter((_, i) => found[i] && passesDetails(found[i], settings))
+  }
+  return picks.map(({ key, tmdbId, mediaType, title, year, posterPath }) => ({ key, tmdbId, mediaType, title, year, posterPath }))
 }
 
 /** The partner's likes this user hasn't swiped, as plain cards (indistinguishable from discover cards). */

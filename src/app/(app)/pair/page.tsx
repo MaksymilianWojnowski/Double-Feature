@@ -43,6 +43,7 @@ export default async function PairPage() {
       <div className="mt-auto flex flex-col gap-3">
         <div className="glass divide-y divide-white/10 overflow-hidden rounded-2xl">
           {[
+            ['/swipes', t.swipes.open],
             ['/settings', t.settings.open],
             ['/about', t.about.title],
           ].map(([href, label]) => (

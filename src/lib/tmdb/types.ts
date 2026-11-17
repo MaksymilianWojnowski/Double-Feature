@@ -37,3 +37,6 @@ export type Details = {
 export type TitleDetails = Omit<Details, 'providers'> & { providers: RegionProviders | null }
 
 export const cardKey = (mediaType: MediaType, tmdbId: number) => `${mediaType}:${tmdbId}`
+
+/** A TMDB recommendation: a card plus the fields the deck filters on without fetching details. */
+export type RecTitle = Card & { genreIds: number[]; rating: number; votes: number; language: string }

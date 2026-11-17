@@ -1,7 +1,9 @@
 'use server'
 
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getMyPair } from '@/lib/pair'
+import { watchRegions } from '@/lib/tmdb/client'
 
 export async function saveName(formData: FormData) {
   const name = String(formData.get('name') ?? '').trim().slice(0, 40)
@@ -13,8 +15,14 @@ export async function saveName(formData: FormData) {
 
 export async function createPair() {
   const { supabase } = await getMyPair()
-  const { error } = await supabase.rpc('create_pair')
+  const { data: pair, error } = await supabase.rpc('create_pair')
   if (error && !error.message.includes('already_paired')) throw error
+  // Start on the creator's country (Vercel's geo header) when TMDB has streaming data for it.
+  const country = (await headers()).get('x-vercel-ip-country')
+  const pairId = (pair as { id: string } | null)?.id
+  if (pairId && country && country !== 'PL' && (await watchRegions().catch((): string[] => [])).includes(country)) {
+    await supabase.from('pair_settings').update({ region: country }).eq('pair_id', pairId)
+  }
   redirect('/pair')
 }
 
