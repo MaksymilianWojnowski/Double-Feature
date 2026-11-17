@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const PUBLIC = ['/login', '/auth', '/about']
+const PUBLIC = ['/login', '/auth', '/about', '/api/keepalive']
 const isPublic = (path: string) => PUBLIC.some((p) => path === p || path.startsWith(p + '/'))
 
 // Refreshes the Supabase session cookie on every request and gates signed-out access.

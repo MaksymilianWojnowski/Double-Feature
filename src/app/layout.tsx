@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { preconnect } from 'react-dom'
+import { Analytics } from '@vercel/analytics/next'
 import { t } from '@/lib/strings/en'
 import './globals.css'
 
@@ -22,7 +23,10 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   preconnect('https://image.tmdb.org') // every screen shows posters from TMDB's CDN
   return (
     <html lang="en">
-      <body className="text-body">{children}</body>
+      <body className="text-body">
+        {children}
+        <Analytics /> {/* Vercel Web Analytics: page views, no cookies. Off until enabled in the Vercel dashboard. */}
+      </body>
     </html>
   )
 }
