@@ -86,17 +86,24 @@ The database tests run the real migration on an in-process Postgres (PGlite), so
 
 1. Push this repo to GitHub.
 2. In [vercel.com/new](https://vercel.com/new), import the repo. The framework is detected automatically; leave the build settings as they are.
-3. Under **Environment Variables**, add the same four variables from `.env.local`. Then click **Deploy**.
+3. Under **Environment Variables**, add the variables from `.env.local` (the four required ones, plus the optional push keys). Then click **Deploy**.
 4. Back in Supabase **Authentication → URL Configuration**: set **Site URL** to the Vercel URL (e.g. `https://double-feature.vercel.app`) and add `https://double-feature.vercel.app/**` to Redirect URLs.
 
 Every later `git push` to `main` deploys automatically.
 
 **Before your first real use, check:**
 - [ ] All four env vars are set in Vercel. Without `SUPABASE_SECRET_KEY` the deck works but never mixes in your partner's likes.
-- [ ] Every file in `supabase/migrations` has been run, in order (`0001`, `0002`, `0003`).
+- [ ] Every file in `supabase/migrations` has been run, in order (`0001` … `0004`).
 - [ ] Supabase's Site URL and Redirect URLs include the deployed address.
 - [ ] Both of you can sign in. Then one creates the pair on the **Pair** tab and sends the invite link.
 - [ ] Set your services on **Settings** (the sliders icon on the deck).
+
+### Optional extras (all free)
+
+- **Match notifications (web push).** Generate keys once: `npx web-push generate-vapid-keys`. Add `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` to Vercel, redeploy. Each person then turns on **Pair → Match notifications** on their phone. On iPhone this only appears inside the app added to the Home Screen (iOS 16.4+).
+- **Keep Supabase awake.** A free Supabase project pauses after a week without activity. `vercel.json` schedules a daily call to `/api/keepalive` that prevents it; nothing to set up. Optionally add `CRON_SECRET` (any long random string) in Vercel so only Vercel can call it.
+- **Visitor stats.** Vercel → your project → **Analytics → Enable**. The app already sends page views (no cookies).
+- **Weekly backups.** See [Backups](#backups).
 
 ### Connect your domain
 
@@ -115,6 +122,26 @@ The app is an installable web app: it gets its own icon, opens full screen, and 
 
 There's no offline mode: the deck needs the network for posters and titles.
 
+## Languages
+
+The UI speaks English, Polish, Portuguese (Brazil), Spanish, German, French and Italian. It follows the browser's language; anyone can change theirs on **Pair → Language**. Film titles and synopses from TMDB follow the same choice. URLs stay the same in every language. Sign-in emails come from Supabase's templates and are one language for everyone.
+
+To add a language: copy `src/lib/strings/pl.ts`, translate it, then register it in `src/lib/strings/index.ts` and `src/lib/i18n/locales.ts`.
+
+## Backups
+
+`.github/workflows/db-backup.yml` dumps the database every Monday, encrypts it, and keeps it as a workflow artifact for 90 days. The repo is public, so the file is useless without your passphrase.
+
+1. Supabase → **Connect** (top bar) → **Session pooler** → copy the URI and put your database password in it. (Not "Direct connection": GitHub's runners can't reach it.)
+2. GitHub → repo → **Settings → Secrets and variables → Actions → New repository secret**:
+   - `SUPABASE_DB_URL`: the URI from step 1.
+   - `BACKUP_PASSPHRASE`: a long random password. Keep it in your password manager; without it the backups can't be opened.
+3. **Actions → Database backup → Run workflow** once to check it works.
+
+To restore: download the artifact, then `gpg -d backup-YYYY-MM-DD.tgz.gpg | tar xz` gives `roles.sql`, `schema.sql` and `data.sql`. Load them into a Supabase project with `psql` in that order, running `data.sql` with `SET session_replication_role = replica` (Supabase's guide: *Backup and Restore using the CLI*).
+
+GitHub pauses scheduled workflows in a repo with no commits for 60 days; a push or a manual run turns it back on.
+
 ## Troubleshooting
 
 - **The sign-in link opens a broken URL.** The redirect URL isn't in Supabase's Redirect URLs allowlist (step 4 of the Supabase setup), so Supabase fell back to the Site URL.
@@ -127,14 +154,17 @@ There's no offline mode: the deck needs the network for posters and titles.
 ## Project layout
 
 ```
-src/app/(app)/        signed-in screens: deck, matches, search, pair, settings
-src/app/              login, auth/confirm, join/[code], onboarding, about, icons + manifest (PWA)
-src/app/api/          deck, titles, providers, search: the only places that talk to TMDB
+src/app/[lang]/(app)/ signed-in screens: deck, matches, search, swipes, pair, settings
+src/app/[lang]/       login, join/[code], onboarding, about; [lang] is the UI language (see proxy.ts)
+src/app/              auth/confirm, icons + manifest (PWA)
+src/app/api/          deck, titles, providers, search (the only places that talk to TMDB), push, keepalive
 src/components/       deck/, details/, match/ (match moment + realtime), matches/, ui/
 src/lib/deck/         deck builder, discover params, genre map
 src/lib/tmdb/         server-only TMDB client (retry + cache), image URLs
-src/lib/strings/en.ts every user-facing string (add pl.ts with the same shape for Polish)
-src/proxy.ts          session refresh + sign-in gate
+src/lib/strings/      every user-facing string: en.ts is the source, one file per language
+src/lib/i18n/         language detection (cookie, then browser), getT() / useT()
+src/lib/push.ts       match notifications; public/sw.js shows them
+src/proxy.ts          session refresh, sign-in gate, language rewrite
 supabase/migrations/  SQL: tables, RLS, match trigger, RPCs
 tests/                vitest; tests/db runs the migrations on PGlite
 ```

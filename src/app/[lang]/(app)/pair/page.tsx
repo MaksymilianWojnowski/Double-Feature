@@ -6,6 +6,7 @@ import { PosterBackdrop } from '@/components/ui/poster-backdrop'
 import { InviteLink } from './invite-link'
 import { LeaveButton } from './leave-button'
 import { LanguagePicker } from './language-picker'
+import { NotificationsToggle } from './notifications-toggle'
 
 type Stats = { my_swipes: number; partner_swipes: number; matches: number; watched: number }
 
@@ -55,6 +56,7 @@ export default async function PairPage() {
             </Link>
           ))}
           <LanguagePicker />
+          <NotificationsToggle />
         </div>
         <form action="/auth/signout" method="post" className="glass overflow-hidden rounded-2xl">
           <button className="w-full px-5 py-3.5 text-left text-body transition-colors active:bg-white/10">{t.pair.signOut}</button>
